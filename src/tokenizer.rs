@@ -52,20 +52,25 @@ pub enum Token {
     TkNum(i64),
     TkId(String),
     TkString(String),
-    TkEof,
-    TkChar(char)
+    TkEof
 }
 
-fn recognizeFirstToken(itr: &mut FStream) -> JsishResult<Token> {
+fn clear_whitespace(itr: &mut FStream) -> () {
+    itr.skip_while(
+        |x| match *x { Ok(c) => (c as char).is_whitespace(), Err(_) => false});
+}
+
+fn recognize_first_token(itr: &mut FStream) -> JsishResult<Token> {
     match itr.peek() {
         None => Ok(Token::TkEof),
         Some(&res) => match res {
-            Ok(c) => Ok(Token::TkIf),
+            Ok(_) => Ok(Token::TkIf),
             Err(err) => Err(JsishError::from(err))
         }
     }
 }
 
 pub fn nextToken(itr: &mut FStream) -> JsishResult<Token> {
-    recognizeFirstToken(itr)
+    clear_whitespace(itr);
+    recognize_first_token(itr)
 }
