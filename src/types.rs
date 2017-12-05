@@ -2,6 +2,7 @@ use std::error;
 use std::fmt;
 use std::io;
 use std::str;
+use std::string;
 
 #[derive(Debug)]
 pub enum JsishError {
@@ -47,3 +48,10 @@ impl From<io::Error> for JsishError {
         JsishError::IoError(err)
     }
 }
+
+impl From<string::FromUtf8Error> for JsishError {
+    fn from(_: string::FromUtf8Error) -> JsishError {
+        JsishError::Message("Invalid UTF-8 data")
+    }
+}
+
