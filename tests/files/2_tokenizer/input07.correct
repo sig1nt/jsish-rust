@@ -1,0 +1,16 @@
+val it = () : unit
+val it = TK_AND : token
+val it = TK_OR : token
+val it = TK_LE : token
+val it = TK_ASSIGN : token
+val it = TK_GE : token
+val it = TK_ASSIGN : token
+val it = TK_EOF : token
+val it = TK_EOF : token
+val it = TK_EOF : token
+val it = TK_EOF : token
+val it = TK_EOF : token
+val it = TK_EOF : token
+val it = TK_EOF : token
+val it = TK_EOF : token
+val it = TK_EOF : token

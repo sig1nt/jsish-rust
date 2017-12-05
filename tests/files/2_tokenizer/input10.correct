@@ -1,0 +1,16 @@
+val it = () : unit
+val it = TK_STRING "" : token
+val it = TK_STRING "abc" : token
+val it = TK_STRING "\n" : token
+val it = TK_STRING "abc def 132 ,&^\t\n\"xyz..---." : token
+val it = TK_EOF : token
+val it = TK_EOF : token
+val it = TK_EOF : token
+val it = TK_EOF : token
+val it = TK_EOF : token
+val it = TK_EOF : token
+val it = TK_EOF : token
+val it = TK_EOF : token
+val it = TK_EOF : token
+val it = TK_EOF : token
+val it = TK_EOF : token

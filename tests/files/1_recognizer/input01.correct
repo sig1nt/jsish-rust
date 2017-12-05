@@ -1,0 +1,21 @@
+identifier: catch
+identifier: delete
+keyword: else
+keyword: false
+identifier: finally
+keyword: function
+keyword: if
+keyword: new
+identifier: null
+keyword: print
+keyword: return
+keyword: this
+identifier: throw
+keyword: true
+identifier: try
+keyword: typeof
+keyword: undefined
+keyword: var
+keyword: while
+identifier: identifier
+end-of-file

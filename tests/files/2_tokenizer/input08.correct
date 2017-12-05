@@ -1,0 +1,16 @@
+val it = () : unit
+val it = TK_PLUS : token
+val it = TK_MINUS : token
+val it = TK_TIMES : token
+val it = TK_DIVIDE : token
+val it = TK_MOD : token
+val it = TK_NOT : token
+val it = TK_GT : token
+val it = TK_AND : token
+val it = TK_LBRACE : token
+val it = TK_RBRACKET : token
+val it = TK_SEMI : token
+val it = TK_QUESTION : token
+val it = TK_COMMA : token
+val it = TK_COLON : token
+val it = TK_EQ : token

@@ -1,0 +1,16 @@
+val it = () : unit
+val it = TK_VAR : token
+val it = TK_ID "sum" : token
+val it = TK_ASSIGN : token
+val it = TK_FUNCTION : token
+val it = TK_LPAREN : token
+val it = TK_RPAREN : token
+val it = TK_LBRACE : token
+val it = TK_VAR : token
+val it = TK_ID "i" : token
+val it = TK_COMMA : token
+val it = TK_ID "x" : token
+val it = TK_ASSIGN : token
+val it = TK_NUM 0 : token
+val it = TK_SEMI : token
+val it = TK_ID "for" : token

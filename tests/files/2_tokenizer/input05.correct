@@ -1,0 +1,16 @@
+val it = () : unit
+val it = TK_EQ : token
+val it = TK_NE : token
+val it = TK_LT : token
+val it = TK_GT : token
+val it = TK_LE : token
+val it = TK_GE : token
+val it = TK_NOT : token
+val it = TK_EOF : token
+val it = TK_EOF : token
+val it = TK_EOF : token
+val it = TK_EOF : token
+val it = TK_EOF : token
+val it = TK_EOF : token
+val it = TK_EOF : token
+val it = TK_EOF : token

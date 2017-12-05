@@ -1,0 +1,23 @@
+keyword: function
+keyword: if
+keyword: new
+identifier: printreturn
+keyword: false
+identifier: finally
+identifier: null
+identifier: identifier
+keyword: print
+keyword: return
+identifier: catch
+identifier: delete
+keyword: else
+keyword: typeof
+keyword: undefined
+identifier: nullidentifier
+keyword: var
+keyword: while
+keyword: this
+identifier: throw
+keyword: true
+identifier: try
+end-of-file

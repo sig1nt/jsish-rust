@@ -1,0 +1,16 @@
+val it = () : unit
+val it = TK_FUNCTION : token
+val it = TK_IF : token
+val it = TK_NEW : token
+val it = TK_ID "printreturn" : token
+val it = TK_FALSE : token
+val it = TK_ID "finally" : token
+val it = TK_ID "null" : token
+val it = TK_ID "identifier" : token
+val it = TK_PRINT : token
+val it = TK_RETURN : token
+val it = TK_ID "catch" : token
+val it = TK_ID "delete" : token
+val it = TK_ELSE : token
+val it = TK_TYPEOF : token
+val it = TK_UNDEFINED : token

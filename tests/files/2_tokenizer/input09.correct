@@ -1,0 +1,16 @@
+val it = () : unit
+val it = TK_NUM 123 : token
+val it = TK_ID "abc349" : token
+val it = TK_MINUS : token
+val it = TK_ID "fwef232" : token
+val it = TK_EOF : token
+val it = TK_EOF : token
+val it = TK_EOF : token
+val it = TK_EOF : token
+val it = TK_EOF : token
+val it = TK_EOF : token
+val it = TK_EOF : token
+val it = TK_EOF : token
+val it = TK_EOF : token
+val it = TK_EOF : token
+val it = TK_EOF : token

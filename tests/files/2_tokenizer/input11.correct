@@ -1,0 +1,16 @@
+val it = () : unit
+val it = TK_VAR : token
+val it = TK_ID "factorial" : token
+val it = TK_ASSIGN : token
+val it = TK_FUNCTION : token
+val it = TK_LPAREN : token
+val it = TK_ID "n" : token
+val it = TK_RPAREN : token
+val it = TK_LBRACE : token
+val it = TK_IF : token
+val it = TK_LPAREN : token
+val it = TK_ID "n" : token
+val it = TK_EQ : token
+val it = TK_ASSIGN : token
+val it = TK_NUM 0 : token
+val it = TK_RPAREN : token

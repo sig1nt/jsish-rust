@@ -1,0 +1,4 @@
+val it = () : unit
+val it = TK_NUM 123 : token
+val it = TK_STRING "@" : token
+invalid symbol: '@'

@@ -1,0 +1,30 @@
+LCMCalculator.prototype = {
+    constructor: LCMCalculator,
+    gcd: function () {
+        var a = Math.abs(this.a), b = Math.abs(this.b), t;
+        if (a < b) {
+            t = b;
+            b = a;
+            a = t;
+        }
+        while (b !== 0) {
+            t = b;
+            b = a % b;
+            a = t;
+        }
+        this["gcd"] = function () {
+            return a;
+        };
+        return a;
+    },
+    "lcm" : function () {
+        var lcm = this.a / this.gcd() * this.b;
+        this.lcm = function () {
+            return lcm;
+        };
+        return lcm;
+    },
+    toString: function () {
+        return "LCMCalculator: a = " + this.a + ", b = " + this.b;
+    }
+};

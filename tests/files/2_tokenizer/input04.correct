@@ -1,0 +1,16 @@
+val it = () : unit
+val it = TK_ASSIGN : token
+val it = TK_DOT : token
+val it = TK_LBRACE : token
+val it = TK_RBRACE : token
+val it = TK_LPAREN : token
+val it = TK_RPAREN : token
+val it = TK_LBRACKET : token
+val it = TK_RBRACKET : token
+val it = TK_COMMA : token
+val it = TK_SEMI : token
+val it = TK_QUESTION : token
+val it = TK_COLON : token
+val it = TK_EOF : token
+val it = TK_EOF : token
+val it = TK_EOF : token

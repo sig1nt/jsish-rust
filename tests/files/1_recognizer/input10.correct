@@ -1,0 +1,5 @@
+string: ""
+string: "abc"
+string: "\n"
+string: "abc def 132 ,&^\t\n\"xyz..---."
+end-of-file

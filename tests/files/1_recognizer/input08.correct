@@ -1,0 +1,25 @@
+symbol: +
+symbol: -
+symbol: *
+symbol: /
+symbol: %
+symbol: !
+symbol: >
+symbol: &&
+symbol: {
+symbol: ]
+symbol: ;
+symbol: ?
+symbol: ,
+symbol: :
+symbol: ==
+symbol: !
+symbol: <=
+identifier: catch
+symbol: >
+identifier: delete
+symbol: -
+identifier: foo
+symbol: +
+keyword: function
+end-of-file
