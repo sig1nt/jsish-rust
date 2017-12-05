@@ -1,11 +1,8 @@
-use types::{JsishResult, JsishError};
+use types::{JsishResult, JsishError, FStream};
 
 use std::fs::File;
 use std::io::prelude::*;
-use std::iter::Peekable;
-use std::io::Bytes;
-
-pub type FStream = Peekable<Bytes<File>>;
+use std::collections::HashMap;
 
 pub enum Token {
     TkLbrace,
@@ -48,12 +45,65 @@ pub enum Token {
     TkVar,
     TkWhile,
     TkGc,
-    TkInuse,
+    TkInUse,
     TkNum(i64),
     TkId(String),
     TkString(String),
     TkEof
 }
+
+use tokenizer::Token::*;
+
+static keywordTokens: [(&str, Token); 15] =
+   [
+      ("else", 		TkElse),
+      ("false",		TkFalse),
+      ("function", 	TkFunction),
+      ("if", 		TkIf),
+      ("new", 		TkNew),
+      ("print", 	TkPrint),
+      ("return", 	TkReturn),
+      ("this", 		TkThis),
+      ("true", 		TkTrue),
+      ("typeof", 	TkTypeof),
+      ("undefined", TkUndefined),
+      ("var", 		TkVar),
+      ("while", 	TkWhile),
+      ("gc", 		TkGc),
+      ("inUse", 	TkInUse)
+   ]
+;
+
+static symbolTokens: [(&str, Token); 26] =
+   [
+      ("{", 	TkLbrace),
+      ("}", 	TkRbrace),
+      ("(", 	TkLparen),
+      (")", 	TkRparen),
+      ("[", 	TkLbracket),
+      ("]", 	TkRbracket),
+      (",", 	TkComma),
+      (";", 	TkSemi),
+      ("?", 	TkQuestion),
+      (":", 	TkColon),
+      (".", 	TkDot),
+      ("+", 	TkPlus),
+      ("-", 	TkMinus),
+      ("*", 	TkTimes),
+      ("/", 	TkDivide),
+      ("%", 	TkMod),
+      ("&&", 	TkAnd),
+      ("||", 	TkOr),
+      ("=", 	TkAssign),
+      ("==", 	TkEq),
+      ("<", 	TkLt),
+      ("<=", 	TkLe),
+      (">", 	TkGt),
+      (">=", 	TkGe),
+      ("!", 	TkNot),
+      ("!=", 	TkNe)
+   ]
+;
 
 fn lookahead (itr: &mut FStream) -> JsishResult<char> {
     match itr.peek() {
@@ -79,7 +129,10 @@ fn tokenizeIdentifier(itr: &mut FStream) -> JsishResult<Token> {
 
     let tk_str = String::from_utf8(token_vec)?;
 
-    Ok(Token::TkId(tk_str))
+	match kwmap.get(&tk_str) {
+		Some(tk) => Ok(tk),
+		None => Ok(TkId(tk_str))
+	}
 }
 
 fn diversifyTokens(itr: &mut FStream) -> JsishResult<Token> {
@@ -96,7 +149,7 @@ fn diversifyTokens(itr: &mut FStream) -> JsishResult<Token> {
 
 fn recognize_first_token(itr: &mut FStream) -> JsishResult<Token> {
     match itr.peek() {
-        None => Ok(Token::TkEof),
+        None => Ok(TkEof),
         Some(&res) => match res {
             Ok(c) => diversifyTokens(itr),
             Err(err) => Err(JsishError::from(err))

@@ -4,6 +4,10 @@ use std::io;
 use std::str;
 use std::string;
 
+use std::iter::Peekable;
+use std::io::Bytes;
+use std::fs::File;
+
 #[derive(Debug)]
 pub enum JsishError {
     Message(&'static str),
@@ -11,6 +15,7 @@ pub enum JsishError {
 }
 
 pub type JsishResult<T> = Result<T, JsishError>;
+pub type FStream = Peekable<Bytes<File>>;
 
 impl error::Error for JsishError {
     fn description(&self) -> &str {

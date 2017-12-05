@@ -5,5 +5,8 @@ use std::env;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
-    tokenizer::nextToken(&args[1]);
+    let mut itr = tokenizer::createFileStream(args[1])
+                             .expect("Failed to create file stream");
+
+    tokenizer::nextToken(&mut itr);
 }
