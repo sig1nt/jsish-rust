@@ -3,7 +3,7 @@ use types::{JsishResult, JsishError, FStream};
 use std::fs::File;
 use std::io::prelude::*;
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum Token {
     TkLbrace,
     TkRbrace,
