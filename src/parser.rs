@@ -38,3 +38,24 @@ fn match_eof(itr: &mut FStream, tk: Token) -> JsishResult<Token> {
         _ => Err(JsishError::from("Expected EOF"))
     }
 }
+
+// First Sets
+fn is_expression(tk: Token) -> bool {
+    match tk {
+        TkLparen => true,
+        TkId(_) => true,
+        TkNum(_) => true,
+        TkString(_) => true,
+        TkTrue => true,
+        TkFalse => true,
+        TkUndefined => true,
+        TkNot => true,
+        TkTypeof => true,
+        TkMinus => true,
+        TkFunction => true,
+        TkNew => true,
+        TkLbrace => true,
+        TkThis => true,
+        _ => false
+    }
+}
