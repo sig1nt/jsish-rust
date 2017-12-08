@@ -54,27 +54,7 @@ pub enum Token {
 
 use tokenizer::Token::*;
 
-static keywordTokens: [(&str, Token); 15] =
-   [
-      ("else", 		TkElse),
-      ("false",		TkFalse),
-      ("function", 	TkFunction),
-      ("if", 		TkIf),
-      ("new", 		TkNew),
-      ("print", 	TkPrint),
-      ("return", 	TkReturn),
-      ("this", 		TkThis),
-      ("true", 		TkTrue),
-      ("typeof", 	TkTypeof),
-      ("undefined", TkUndefined),
-      ("var", 		TkVar),
-      ("while", 	TkWhile),
-      ("gc", 		TkGc),
-      ("inUse", 	TkInUse)
-   ]
-;
-
-static symbolTokens: [(&str, Token); 26] =
+const symbolTokens: [(&str, Token); 26] =
    [
       ("{", 	TkLbrace),
       ("}", 	TkRbrace),
@@ -106,17 +86,52 @@ static symbolTokens: [(&str, Token); 26] =
 ;
 
 fn lookahead (itr: &mut FStream) -> JsishResult<char> {
-    match itr.peek() {
-        None => Err(JsishError::from("Unexpected EOF")),
-        Some(&res) => match res {
-            Ok(c) => Ok(c as char),
-            Err(err) => Err(JsishError::from(err))
+    if let Some(&Ok(c)) = itr.peek() {
+        Ok(c as char)
+    }
+    else {
+        match itr.next() {
+            None => Err(JsishError::from("Unexpected EOF")),
+            Some(Err(err)) => Err(JsishError::from(err)),
+            _ => panic!("Peek and Next have divergent state")
         }
     }
 }
 
+fn recognizeKeywords(tk_str: &str) -> Token {
+    let keywords: Vec<(&str, Token)> =
+       vec![
+          ("else", 		TkElse),
+          ("false",		TkFalse),
+          ("function", 	TkFunction),
+          ("if", 		TkIf),
+          ("new", 		TkNew),
+          ("print", 	TkPrint),
+          ("return", 	TkReturn),
+          ("this", 		TkThis),
+          ("true", 		TkTrue),
+          ("typeof", 	TkTypeof),
+          ("undefined", TkUndefined),
+          ("var", 		TkVar),
+          ("while", 	TkWhile),
+          ("gc", 		TkGc),
+          ("inUse", 	TkInUse)
+       ].into_iter().collect()
+    ;
+
+    for (k,v) in keywords {
+        if k == tk_str {
+            return v;
+        }
+    }
+
+    return TkId(String::from(tk_str));
+}
+
 fn tokenizeIdentifier(itr: &mut FStream) -> JsishResult<Token> {
+
     let mut token_vec = Vec::new();
+
     loop {
         let next_char = lookahead(itr)?;
         if next_char.is_alphanumeric() {
@@ -127,12 +142,9 @@ fn tokenizeIdentifier(itr: &mut FStream) -> JsishResult<Token> {
         }
     }
 
-    let tk_str = String::from_utf8(token_vec)?;
+    let tk_str: String = String::from_utf8(token_vec)?;
 
-	match kwmap.get(&tk_str) {
-		Some(tk) => Ok(tk),
-		None => Ok(TkId(tk_str))
-	}
+    Ok(recognizeKeywords(&tk_str))
 }
 
 fn diversifyTokens(itr: &mut FStream) -> JsishResult<Token> {
@@ -151,7 +163,7 @@ fn recognize_first_token(itr: &mut FStream) -> JsishResult<Token> {
     match itr.peek() {
         None => Ok(TkEof),
         Some(&res) => match res {
-            Ok(c) => diversifyTokens(itr),
+            Ok(_) => diversifyTokens(itr),
             Err(err) => Err(JsishError::from(err))
         }
     }
