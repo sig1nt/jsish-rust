@@ -2,7 +2,6 @@ use types::{JsishResult, JsishError, FStream};
 
 use std::fs::File;
 use std::io::prelude::*;
-use std::collections::HashMap;
 
 pub enum Token {
     TkLbrace,
@@ -160,11 +159,14 @@ fn diversifyTokens(itr: &mut FStream) -> JsishResult<Token> {
 }
 
 fn recognize_first_token(itr: &mut FStream) -> JsishResult<Token> {
-    match itr.peek() {
-        None => Ok(TkEof),
-        Some(&res) => match res {
-            Ok(_) => diversifyTokens(itr),
-            Err(err) => Err(JsishError::from(err))
+    if let Some(&Ok(_)) = itr.peek() {
+        diversifyTokens(itr)
+    }
+    else {
+        match itr.next() {
+            None => Ok(TkEof),
+            Some(Err(err)) => Err(JsishError::from(err)),
+            _ => panic!("Peek and Next have divergent state")
         }
     }
 }
