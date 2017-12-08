@@ -3,6 +3,7 @@ use types::{JsishResult, JsishError, FStream};
 use std::fs::File;
 use std::io::prelude::*;
 
+#[derive(Debug)]
 pub enum Token {
     TkLbrace,
     TkRbrace,
@@ -53,51 +54,94 @@ pub enum Token {
 
 use tokenizer::Token::*;
 
-const symbolTokens: [(&str, Token); 26] =
-   [
-      ("{", 	TkLbrace),
-      ("}", 	TkRbrace),
-      ("(", 	TkLparen),
-      (")", 	TkRparen),
-      ("[", 	TkLbracket),
-      ("]", 	TkRbracket),
-      (",", 	TkComma),
-      (";", 	TkSemi),
-      ("?", 	TkQuestion),
-      (":", 	TkColon),
-      (".", 	TkDot),
-      ("+", 	TkPlus),
-      ("-", 	TkMinus),
-      ("*", 	TkTimes),
-      ("/", 	TkDivide),
-      ("%", 	TkMod),
-      ("&&", 	TkAnd),
-      ("||", 	TkOr),
-      ("=", 	TkAssign),
-      ("==", 	TkEq),
-      ("<", 	TkLt),
-      ("<=", 	TkLe),
-      (">", 	TkGt),
-      (">=", 	TkGe),
-      ("!", 	TkNot),
-      ("!=", 	TkNe)
-   ]
-;
 
 fn lookahead (itr: &mut FStream) -> JsishResult<char> {
+    // Try and just read the file
     if let Some(&Ok(c)) = itr.peek() {
-        Ok(c as char)
+        return Ok(c as char);
     }
-    else {
-        match itr.next() {
-            None => Err(JsishError::from("Unexpected EOF")),
-            Some(Err(err)) => Err(JsishError::from(err)),
-            _ => panic!("Peek and Next have divergent state")
-        }
+
+    // Something went wrong, so we have to figure out what
+    match itr.next() {
+        None => Err(JsishError::from("Unexpected EOF")),
+        Some(Err(err)) => Err(JsishError::from(err)),
+        _ => panic!("Peek and Next have divergent state")
     }
 }
 
-fn recognizeKeywords(tk_str: &str) -> Token {
+fn tokenize_symbol(itr: &mut FStream) -> JsishResult<Token> {
+    let single_symbols: Vec<(char, Token)> =
+       vec![
+          ('{', 	TkLbrace),
+          ('}', 	TkRbrace),
+          ('(', 	TkLparen),
+          (')', 	TkRparen),
+          ('[', 	TkLbracket),
+          (']', 	TkRbracket),
+          (',', 	TkComma),
+          (';', 	TkSemi),
+          ('?', 	TkQuestion),
+          (':', 	TkColon),
+          ('.', 	TkDot),
+          ('+', 	TkPlus),
+          ('-', 	TkMinus),
+          ('*', 	TkTimes),
+          ('/', 	TkDivide),
+          ('%', 	TkMod),
+        ]
+    ;
+
+    let opt_eq_symbols: Vec<(char, Token, Token)> =
+        vec![
+          ('=', TkAssign, TkEq),
+          ('<',	TkLt, TkLe),
+          ('>',	TkGt, TkGe),
+          ('!', TkNot, TkNe),
+       ]
+    ;
+
+    let c = lookahead(itr)?;
+
+    for (k,v) in single_symbols {
+        if k == c {
+            itr.next();
+            return Ok(v);
+        }
+    }
+
+    if c == '&' {
+        itr.next();
+        if lookahead(itr)? == '&' {
+            itr.next();
+            return Ok(TkAnd);
+        }
+    }
+
+    if c == '|' {
+        itr.next();
+        if lookahead(itr)? == '|' {
+            itr.next();
+            return Ok(TkOr);
+        }
+    }
+
+    for (k, wo_eq, w_eq) in opt_eq_symbols {
+        if c == k {
+            itr.next();
+            if itr.peek().is_some() && lookahead(itr)? == '=' {
+                itr.next();
+                return Ok(w_eq);
+            }
+            else {
+                return Ok(wo_eq);
+            }
+        }
+    }
+
+    Err(JsishError::from("Unknown token type"))
+}
+
+fn recognize_keywords(tk_str: &str) -> Token {
     let keywords: Vec<(&str, Token)> =
        vec![
           ("else", 		TkElse),
@@ -115,7 +159,7 @@ fn recognizeKeywords(tk_str: &str) -> Token {
           ("while", 	TkWhile),
           ("gc", 		TkGc),
           ("inUse", 	TkInUse)
-       ].into_iter().collect()
+       ]
     ;
 
     for (k,v) in keywords {
@@ -127,13 +171,12 @@ fn recognizeKeywords(tk_str: &str) -> Token {
     return TkId(String::from(tk_str));
 }
 
-fn tokenizeIdentifier(itr: &mut FStream) -> JsishResult<Token> {
-
+fn build_token(itr: &mut FStream, is_valid: &Fn (char) -> bool) -> JsishResult<String>{
     let mut token_vec = Vec::new();
 
     loop {
-        let next_char = lookahead(itr)?;
-        if next_char.is_alphanumeric() {
+        //println!("tokenize id");
+        if is_valid(lookahead(itr)?) {
             token_vec.push(itr.next().expect("Itr Failure")? as u8);
         }
         else {
@@ -141,26 +184,90 @@ fn tokenizeIdentifier(itr: &mut FStream) -> JsishResult<Token> {
         }
     }
 
-    let tk_str: String = String::from_utf8(token_vec)?;
-
-    Ok(recognizeKeywords(&tk_str))
+    match String::from_utf8(token_vec) {
+        Ok(s) => Ok(s),
+        Err(err) => Err(JsishError::from(err))
+    }
 }
 
-fn diversifyTokens(itr: &mut FStream) -> JsishResult<Token> {
+fn tokenize_identifier(itr: &mut FStream) -> JsishResult<Token> {
+    let id_token = build_token(itr, &(|x| x.is_alphanumeric()))?;
+
+    Ok(recognize_keywords(&id_token))
+}
+
+fn tokenize_digits(itr: &mut FStream) -> JsishResult<Token> {
+    let num_token = build_token(itr, &(|x| x.is_digit(10)))?;
+
+    Ok(TkNum(i64::from_str_radix(&num_token, 10)?))
+}
+
+fn parse_escape(itr: &mut FStream) -> JsishResult<char> {
+    itr.next();
+    match itr.next() {
+        None => Err(JsishError::from("Invalid String")),
+        Some(Err(err)) => Err(JsishError::from(err)),
+        Some(Ok(c)) => match c as char {
+            '\\' => Ok('\\'),
+            '\"' => Ok('"'),
+            'n' => Ok('\n'),
+            'r' => Ok('\r'),
+            't' => Ok('\t'),
+            'b' => Ok('\x08'),
+            'v' => Ok('\x0b'),
+            'f' => Ok('\x0c'),
+            _ => Err(JsishError::from("Invalid Escape Sequence"))
+        }
+    }
+}
+fn tokenize_string(itr: &mut FStream) -> JsishResult<Token> {
+    let mut token_vec = Vec::new();
+    itr.next();
+
+    loop {
+        if let Some(&Ok(c)) = itr.peek() {
+            match c as char {
+                '\\' => token_vec.push(parse_escape(itr)? as u8),
+                '\"' => {itr.next(); break},
+                _ => token_vec.push(itr.next().expect("Itr Failure")? as u8)
+            }
+        }
+        else {
+            match itr.next() {
+                None => return Err(JsishError::from("Invalid String")),
+                Some(Err(err)) => return Err(JsishError::from(err)),
+                _ => panic!("Peek and Next have divergent state")
+            }
+        }
+    }
+
+    match String::from_utf8(token_vec) {
+        Ok(s) => Ok(TkString(s)),
+        Err(err) => Err(JsishError::from(err))
+    }
+}
+
+fn diversify_tokens(itr: &mut FStream) -> JsishResult<Token> {
     let next_char = lookahead(itr)?;
 
     if next_char.is_alphabetic() {
-        tokenizeIdentifier(itr)
+        tokenize_identifier(itr)
+    }
+    else if next_char.is_digit(10) {
+        tokenize_digits(itr)
+    }
+    else if next_char == '"' {
+        tokenize_string(itr)
     }
     else {
-        Err(JsishError::from("Unknown token type"))
+        tokenize_symbol(itr)
     }
 
 }
 
 fn recognize_first_token(itr: &mut FStream) -> JsishResult<Token> {
     if let Some(&Ok(_)) = itr.peek() {
-        diversifyTokens(itr)
+        diversify_tokens(itr)
     }
     else {
         match itr.next() {
@@ -172,16 +279,28 @@ fn recognize_first_token(itr: &mut FStream) -> JsishResult<Token> {
 }
 
 fn clear_whitespace(itr: &mut FStream) -> () {
-    itr.skip_while(
-        |x| match *x { Ok(c) => (c as char).is_whitespace(), Err(_) => false});
+    loop {
+        //println!("clear");
+        if let Some(&Ok(c)) = itr.peek() {
+            if (c as char).is_whitespace() {
+                itr.next();
+            }
+            else {
+                break;
+            }
+        }
+        else {
+            break;
+        }
+    }
 }
 
-pub fn nextToken(itr: &mut FStream) -> JsishResult<Token> {
+pub fn next_token(itr: &mut FStream) -> JsishResult<Token> {
     clear_whitespace(itr);
     recognize_first_token(itr)
 }
 
-pub fn createFileStream(filename: String) -> JsishResult<FStream> {
+pub fn create_file_stream(filename: &str) -> JsishResult<FStream> {
     match File::open(filename) {
         Ok(f) => Ok(f.bytes().peekable()),
         Err(e) => Err(JsishError::from(e))

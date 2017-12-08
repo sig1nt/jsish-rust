@@ -3,6 +3,7 @@ use std::fmt;
 use std::io;
 use std::str;
 use std::string;
+use std::num;
 
 use std::iter::Peekable;
 use std::io::Bytes;
@@ -60,3 +61,8 @@ impl From<string::FromUtf8Error> for JsishError {
     }
 }
 
+impl From<num::ParseIntError> for JsishError {
+    fn from(_: num::ParseIntError) -> JsishError {
+        JsishError::Message("Invalid integer")
+    }
+}
