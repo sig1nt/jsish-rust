@@ -1,0 +1,17 @@
+function foo()
+{
+   return 2;
+}
+
+function bar()
+{
+   var x;
+   x = foo() + 1;
+   print (x);
+   print ("\n");
+   return foo() * x + foo();
+   print (1);
+   print ("\n");
+}
+   print (bar());
+   print ("\n");

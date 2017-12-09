@@ -1,0 +1,14 @@
+
+function f()
+{
+   print "Declared function f.\n";
+}
+
+(function f(x) {
+   if (x) {
+      print "Named function expression f.\n";
+   }
+   else {
+      f(true);
+   }
+})(false);

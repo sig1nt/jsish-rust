@@ -1,0 +1,5 @@
+var x;
+  function j(b)
+  {
+  }
+   x = j(true > 3);

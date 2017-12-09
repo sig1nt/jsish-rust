@@ -11,7 +11,7 @@ use std::fs::File;
 
 #[derive(Debug)]
 pub enum JsishError {
-    Message(&'static str),
+    Message(String),
     IoError(io::Error),
 }
 
@@ -21,7 +21,7 @@ pub type FStream = Peekable<Bytes<File>>;
 impl error::Error for JsishError {
     fn description(&self) -> &str {
         match *self {
-            JsishError::Message(msg) => msg,
+            JsishError::Message(ref msg) => msg,
             JsishError::IoError(ref err) => err.description(),
         }
     }
@@ -37,15 +37,21 @@ impl error::Error for JsishError {
 impl fmt::Display for JsishError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match *self {
-            JsishError::Message(msg) => msg.fmt(f),
+            JsishError::Message(ref msg) => msg.fmt(f),
             JsishError::IoError(ref err) => err.fmt(f),
         }
     }
 }
 
+impl From<String> for JsishError {
+    fn from(err: String) -> JsishError {
+        JsishError::Message(err)
+    }
+}
+
 impl From<&'static str> for JsishError {
     fn from(err: &'static str) -> JsishError {
-        JsishError::Message(err)
+        JsishError::Message(String::from(err))
     }
 }
 
@@ -57,12 +63,12 @@ impl From<io::Error> for JsishError {
 
 impl From<string::FromUtf8Error> for JsishError {
     fn from(_: string::FromUtf8Error) -> JsishError {
-        JsishError::Message("Invalid UTF-8 data")
+        JsishError::from("Invalid UTF-8 data")
     }
 }
 
 impl From<num::ParseIntError> for JsishError {
     fn from(_: num::ParseIntError) -> JsishError {
-        JsishError::Message("Invalid integer")
+        JsishError::from("Invalid integer")
     }
 }

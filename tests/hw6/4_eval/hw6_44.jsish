@@ -1,0 +1,21 @@
+function f()
+{
+   var a = 2;
+   print a;
+   print "\n";
+
+   var a = 3;
+   print a;
+   print "\n";
+
+   var a;
+   print a;
+   print "\n";
+
+   var x = 9, y = x * 2;
+
+   return y;
+}
+
+print f();
+print "\n";

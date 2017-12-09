@@ -1,0 +1,5 @@
+  function f()
+  {
+    if (3) { print(1); print("\n"); }
+  }
+   f();

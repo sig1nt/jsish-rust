@@ -1,0 +1,21 @@
+var a = "global\n";
+function f()
+{
+var a = "in f\n";
+function h()
+{
+var a = "in h\n";
+g();
+print a;
+}
+function g()
+{
+var a = "in g\n";
+print a;
+}
+h();
+g();
+print a;
+}
+f();
+print a;

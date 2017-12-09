@@ -1,3 +1,4 @@
+#[derive(Clone, Debug)]
 pub enum BinaryOperator {
     BopPlus,
     BopMinus,
@@ -14,29 +15,34 @@ pub enum BinaryOperator {
     BopComma
 }
 
+#[derive(Clone, Debug)]
 pub enum UnaryOperator {
     UopNot,
     UopTypeof,
     UopMinus
 }
 
+#[derive(Clone, Debug)]
 pub struct ExpBinaryData {
     opr: BinaryOperator,
     lft: Box<Expression>,
     rht: Box<Expression>
 }
 
+#[derive(Clone, Debug)]
 pub struct ExpUnaryData {
     opr: UnaryOperator,
     opnd: Box<Expression>
 }
 
+#[derive(Clone, Debug)]
 pub struct ExpCondData {
     guard: Box<Expression>,
     then_exp: Box<Expression>,
     else_exp: Box<Expression>
 }
 
+#[derive(Clone, Debug)]
 pub enum Expression {
     ExpNum(i64),
     ExpString(String),
@@ -48,14 +54,17 @@ pub enum Expression {
     ExpCond(ExpCondData)
 }
 
+#[derive(Clone, Debug)]
 pub enum Statement {
     StExp(Expression)
 }
 
+#[derive(Clone, Debug)]
 pub enum SourceElement {
     Stmt(Statement)
 }
 
+#[derive(Clone, Debug)]
 pub enum Program {
-    Program(Vec<SourceElement>)
+    Prog(Vec<SourceElement>)
 }

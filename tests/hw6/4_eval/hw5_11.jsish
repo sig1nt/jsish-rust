@@ -1,0 +1,6 @@
+i = undefined;
+print i;
+print "\n";
+b = undefined;
+print b;
+print "\n";

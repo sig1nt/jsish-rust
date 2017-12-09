@@ -1,0 +1,8 @@
+var a, b;
+var f;
+
+a = 7;
+f = function (a) { print a; print "\n"; };
+f(2);
+print a;
+print "\n";

@@ -1,0 +1,15 @@
+i = 20;
+(i == 10) ? i = 15 : (i ==20) ? i = 5 : i = i;
+print i;
+print "\n";
+
+i = 10;
+(i == 10) ? i = 15 : (i ==20) ? i = 5 : i = i;
+print i;
+print "\n";
+
+i = 40;
+(i == 10) ? i = 15 : (i ==20) ? i = 5 : i = i;
+print i;
+print "\n";
+

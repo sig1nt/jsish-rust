@@ -1,0 +1,13 @@
+function f(x)
+{
+var a = 1;
+print a;
+print "\n";
+var a = 9;
+print a;
+print "\n";
+var a;
+print a;
+print "\n";
+}
+f();

@@ -1,0 +1,7 @@
+i = 100;
+while (! (i < 0) && ! (i == 0))
+{
+	print i;
+print "\n";
+	i = i - 1;
+}

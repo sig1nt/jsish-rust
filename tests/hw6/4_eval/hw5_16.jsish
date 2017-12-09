@@ -1,0 +1,18 @@
+a = 999;
+if (a == 9) {print 11; print "\n"; }
+else { if (a == 99) {print 22; print "\n"; }
+	else {if ( a ==8) {print 33; print "\n"; }
+		else {print 44; print "\n"; }}
+   }
+a = 99;
+if (a == 9) {print 11; print "\n"; }
+else {if (a == 99) {print 22; print "\n"; }
+        else {if ( a ==8) {print 33; print "\n"; }
+                else {print 44; print "\n"; }}
+   }
+a = 88;
+if (a == 9) {print 11; print "\n"; }
+else {if (a == 99) {print 22; print "\n"; }
+        else {if ( a ==8) {print 33; print "\n"; }
+                else {print 44; print "\n"; }}
+   }

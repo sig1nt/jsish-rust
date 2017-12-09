@@ -1,0 +1,12 @@
+var add, add1;
+
+add = function(x) { return function(y) { return x + y; }; };
+add1 = add(1);
+print (add1(2));
+print ("\n");
+print (add1(3));
+print ("\n");
+print (add1(9));
+print ("\n");
+print (add1(0 - 1));
+print ("\n");

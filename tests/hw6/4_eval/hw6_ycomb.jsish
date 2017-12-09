@@ -1,0 +1,25 @@
+var h;
+var fact;
+
+function z(f) {
+   function g(x) {
+      return f(function (y) {
+                return x(x)(y);
+              });
+   }
+   return g(g);
+}
+
+fact = function (funcArg) {
+   return function (x) {
+      if (x == 0) {
+         return 1;
+      }
+      else {
+         return x * (funcArg (x - 1));
+      }
+   };
+};
+h = z(fact);
+print (h(6));
+print ("\n");

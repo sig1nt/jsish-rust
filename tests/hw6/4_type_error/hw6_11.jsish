@@ -1,0 +1,19 @@
+var f;
+function g(x)
+{
+   if (x)
+   {
+      return function (x) { return x + 1; };
+   }
+   else
+   {
+      return true;
+   }
+}
+   f = g(true);
+   print (f);
+   print ("\n");
+   f = g(false);
+   print (f);
+   print ("\n");
+   f(2);

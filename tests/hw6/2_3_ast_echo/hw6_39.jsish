@@ -1,0 +1,46 @@
+var odds, odd;
+
+function f(x)
+{
+   var tmp;
+   function counter()
+   {
+      tmp = x;
+      x = x + 1;
+      return tmp;
+   }
+   return counter;
+}
+
+function filter(filt, gen)
+{
+   return function ()
+   {
+      var tmp;
+      tmp = gen();
+      while (!filt(tmp))
+      {
+         tmp = gen();
+      }
+      return tmp;
+   };
+}
+
+   odd = function (x) { return (x / 2) * 2 != x; };
+   odds = filter(odd, f(1));
+   print odds();
+   print "\n";
+   print odds();
+   print "\n";
+   print odds();
+   print "\n";
+   print odds();
+   print "\n";
+   print odds();
+   print "\n";
+   print odds();
+   print "\n";
+   print odds();
+   print "\n";
+   print odds();
+   print "\n";

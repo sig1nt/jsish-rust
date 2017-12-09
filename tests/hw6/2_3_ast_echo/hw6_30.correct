@@ -1,0 +1,8 @@
+var f;
+(f = (function (a, b)
+{
+print (a + b);
+print "\n";
+}
+));
+f(1, 2);

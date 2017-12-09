@@ -1,0 +1,13 @@
+function f(a)
+{
+   print a + y;
+   print "\n";
+}
+
+y = 9;
+print 0;
+print "\n";
+f(1);
+f(2);
+print 3;
+print "\n";

@@ -1,0 +1,12 @@
+   i = true;
+   j = 5;
+   while (i)
+   {
+      if (j < 0)
+      {
+         i = undefined;
+      }
+      j = j - 1;
+      print j;
+      print "\n";
+   }

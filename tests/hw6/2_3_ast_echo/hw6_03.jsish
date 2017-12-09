@@ -1,0 +1,15 @@
+var y;
+
+function f(z)
+{
+   print z;
+   print "\n";
+}
+
+y = 1;
+print 0;
+print "\n";
+f(1);
+f(2);
+print 3;
+print "\n";

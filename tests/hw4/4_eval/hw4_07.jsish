@@ -1,0 +1,12 @@
+print 2;
+print "\n";
+print 4;
+print "\n";
+print "Hello.";
+print "\n";
+print true;
+print "\n";
+print undefined;
+print "\n";
+print false;
+print "\n";

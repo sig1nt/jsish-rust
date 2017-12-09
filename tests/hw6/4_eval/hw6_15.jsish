@@ -1,0 +1,39 @@
+  var i;
+  function f(n)
+  {
+    var i = 999;
+    print (i);
+    print ("\n");
+    if (n > 0)
+    {
+      g(n);
+    }
+    print (i);
+    print ("\n");
+  }
+  function g(n)
+  {
+    print (i);
+    print ("\n");
+    h(n);
+  }
+  function h(n)
+  {
+    j(n);
+  }
+  function j(n)
+  {
+    var j;
+    j = 17;
+    x = k(n);
+    print (j);
+    print ("\n");
+  }
+  function k(n)
+  {
+    f(n - 1);
+  }
+i = 3;
+x = f(3);
+print (i);
+print ("\n");

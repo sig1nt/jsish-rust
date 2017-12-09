@@ -1,0 +1,10 @@
+function foo()
+{
+   print 1;
+   print "\n";
+   return 2;
+   print 3;
+   print "\n";
+}
+   print foo();
+   print "\n";

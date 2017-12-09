@@ -1,0 +1,6 @@
+function f()
+{
+}
+
+print f();
+print "\n";

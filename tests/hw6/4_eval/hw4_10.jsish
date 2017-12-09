@@ -1,0 +1,10 @@
+print typeof undefined;
+print "\n";
+print typeof "Hello.";
+print "\n";
+print typeof true;
+print "\n";
+print typeof false;
+print "\n";
+print typeof 47;
+print "\n";

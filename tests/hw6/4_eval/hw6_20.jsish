@@ -1,0 +1,10 @@
+function f(a, b)
+{
+   return a + b;
+}
+   print (f(1,2));
+   print ("\n");
+   print (f(3,4));
+   print ("\n");
+   print (f(3,f(3,4)));
+   print ("\n");

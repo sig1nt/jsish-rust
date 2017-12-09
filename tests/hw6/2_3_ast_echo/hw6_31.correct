@@ -1,0 +1,11 @@
+var a;
+var f;
+(a = 7);
+(function (a)
+{
+print a;
+print "\n";
+}
+)(2);
+print a;
+print "\n";

@@ -1,0 +1,22 @@
+var b, c;
+function f(g)
+{
+var b = 100, c = 200;
+g();
+print b;
+print "\n";
+print c;
+print "\n";
+}
+(b = 1);
+(c = 2);
+f((function ()
+{
+(b = 99);
+(c = 21);
+}
+));
+print b;
+print "\n";
+print c;
+print "\n";

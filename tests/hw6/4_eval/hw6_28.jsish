@@ -1,0 +1,6 @@
+var a;
+var f;
+
+a = 7;
+f = function () { print (a); print ("\n"); };
+f();

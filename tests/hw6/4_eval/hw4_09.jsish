@@ -1,0 +1,6 @@
+print !true;
+print "\n";
+print !false;
+print "\n";
+print -2;
+print "\n";

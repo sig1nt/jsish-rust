@@ -1,0 +1,9 @@
+function f() {}
+function g() {}
+
+print (f == f);
+print ("\n");
+print (f == g);
+print ("\n");
+print (function (){} == function (){});
+print ("\n");

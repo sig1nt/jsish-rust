@@ -1,0 +1,14 @@
+var y;
+
+function f()
+{
+   print y;
+   print "\n";
+}
+
+y = 1;
+print 0;
+print "\n";
+f();
+print 2;
+print "\n";

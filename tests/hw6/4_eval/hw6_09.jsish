@@ -1,0 +1,23 @@
+   function f(a, b)
+   {
+      print (a);
+      print ("\n");
+      a = a - 7;
+      b = false;
+      print (a);
+      print ("\n");
+      print (b);
+      print ("\n");
+   }
+
+a = 28;
+b = true;
+print (a);
+print (" ");
+print (b);
+print ("\n");
+f(a, b);
+print (a);
+print (" ");
+print (b);
+print ("\n");

@@ -1,0 +1,8 @@
+var i, j;
+  function f()
+  {
+    i = 3;
+    j = 4;
+    i = j > false;
+  }
+   i = f();

@@ -1,0 +1,7 @@
+id = 3;
+foo = 5;
+id >= foo;
+id <= foo;
+id <= foo && foo <= 22;
+id <= foo && foo > 22;
+id < foo || foo > 10;

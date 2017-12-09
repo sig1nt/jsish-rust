@@ -1,0 +1,26 @@
+var g, h;
+function f()
+{
+   var a;
+   a = 0;
+   return function () { a = a + 1; return a; };
+}
+
+   g = f();
+   h = f();
+   print (g());
+   print ("\n");
+   print (g());
+   print ("\n");
+   print (g());
+   print ("\n");
+   print (h());
+   print ("\n");
+   print (h());
+   print ("\n");
+   print (h());
+   print ("\n");
+   print (g());
+   print ("\n");
+   print (h());
+   print ("\n");

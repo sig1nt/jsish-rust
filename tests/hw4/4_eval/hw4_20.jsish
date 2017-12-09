@@ -1,0 +1,2 @@
+print typeof "Hello" == "string" ? true : !true;
+print "\n";

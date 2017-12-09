@@ -1,0 +1,16 @@
+  var result;
+  function fact(n)
+  {
+    if (n <= 0)
+    {
+	result = 1;
+    }
+    else {
+	fact(n - 1);
+        result = n * result;
+    }
+  }
+
+fact(5);
+print result;
+print "\n";

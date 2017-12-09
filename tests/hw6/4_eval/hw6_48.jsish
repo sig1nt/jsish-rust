@@ -1,0 +1,16 @@
+function f()
+{
+   function g()
+   {
+      function h()
+      {
+         return ("from h\n");
+      }
+
+      return h;
+   }
+
+   return g;
+}
+
+print (f()()());

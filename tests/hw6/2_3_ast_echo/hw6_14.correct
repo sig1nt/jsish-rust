@@ -1,0 +1,27 @@
+var i, x;
+function f(i)
+{
+while ((i > 0))
+{
+g(i);
+(i = (i - 1));
+}
+}
+function g(j)
+{
+print (j * 2);
+print "\n";
+(i = (i - 1));
+}
+(i = 20);
+while ((i > 0))
+{
+print i;
+print "\n";
+f(i);
+print i;
+print "\n";
+(i = (i - 1));
+}
+print i;
+print "\n";

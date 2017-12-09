@@ -1,0 +1,26 @@
+var g;
+
+function f()
+{
+   var a = b = g, c, d = 9;
+   print a;
+   print "\n";
+   print b;
+   print "\n";
+   print g;
+   print "\n";
+   print d;
+   print "\n";
+}
+
+g = 4;
+f();
+
+print a;
+print "\n";
+print b;
+print "\n";
+print g;
+print "\n";
+print d;
+print "\n";

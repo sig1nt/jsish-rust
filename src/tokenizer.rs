@@ -3,6 +3,8 @@ use types::{JsishResult, JsishError, FStream};
 use std::fs::File;
 use std::io::prelude::*;
 
+use std::fmt;
+
 #[derive(Debug, PartialEq)]
 pub enum Token {
     TkLbrace,
@@ -50,6 +52,60 @@ pub enum Token {
     TkId(String),
     TkString(String),
     TkEof
+}
+
+impl fmt::Display for Token {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let c = match *self {
+            TkLbrace => "{",
+            TkRbrace => "}",
+            TkLparen => "(",
+            TkRparen => ")",
+            TkLbracket => "[",
+            TkRbracket => "]",
+            TkComma => ",",
+            TkSemi => ";",
+            TkQuestion => "?",
+            TkColon => ":",
+            TkDot => ".",
+            TkPlus => "+",
+            TkMinus => "-",
+            TkTimes => "*",
+            TkDivide => "/",
+            TkMod => "%",
+            TkAnd => "&&",
+            TkOr => "||",
+            TkAssign => "=",
+            TkEq => "==",
+            TkLt => "<",
+            TkLe => "<=",
+            TkGt => ">",
+            TkGe => ">=",
+            TkNot => "!",
+            TkNe => "!=",
+            TkElse => "else",
+            TkFalse => "false",
+            TkFunction => "function",
+            TkIf => "if",
+            TkNew => "new",
+            TkPrint => "print",
+            TkReturn => "return",
+            TkThis => "this",
+            TkTrue => "true",
+            TkTypeof => "typeof",
+            TkUndefined => "undefined",
+            TkVar => "var",
+            TkWhile => "while",
+            TkGc => "gc",
+            TkInUse => "InUse",
+            TkEof => "eof",
+            TkNum(n) => return write!(f, "{}", n),
+            TkId(ref s) => return write!(f, "{}", s),
+            TkString(ref s) => return write!(f, "{}", s)
+        };
+
+        write!(f, "{}", c)
+    }
 }
 
 use tokenizer::Token::*;

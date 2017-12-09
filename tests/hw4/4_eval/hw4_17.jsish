@@ -1,0 +1,12 @@
+print true ? 1 : 2;
+print "\n";
+print false ? 1 : 2;
+print "\n";
+print true ? false ? 1 : 2 : 3;
+print "\n";
+print true ? true ? 1 : 2 : 3;
+print "\n";
+print false ? true ? 1 : 2 : 3;
+print "\n";
+print false ? false ? 1 : 2 : 3;
+print "\n";

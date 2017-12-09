@@ -1,0 +1,10 @@
+function m()
+{
+   function g()
+   {
+      if (x > 2)
+      {
+         function h() {}
+      }
+   }
+}

@@ -1,0 +1,28 @@
+i = 10;
+if (i > 5)
+{
+   if (i > 20)
+   {
+      print 32 ;
+      print "\n";
+   }
+   else
+   {
+      print 31 ;
+      print "\n";
+   }
+}
+
+if (i > 5)
+{
+   if (i > 20)
+   {
+      print 32 ;
+      print "\n";
+   }
+}
+else
+{
+   print 31 ;
+   print "\n";
+}

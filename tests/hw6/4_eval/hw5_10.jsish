@@ -1,0 +1,12 @@
+{
+i = 17;
+b = true;
+print i;
+print " ";
+print 10;
+print "\n";
+print b;
+print " ";
+print false;
+print "\n";
+}

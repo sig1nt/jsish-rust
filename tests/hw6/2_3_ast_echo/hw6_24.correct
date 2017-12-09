@@ -1,0 +1,10 @@
+function foo()
+{
+return 2;
+}
+function bar()
+{
+return (foo() + 1);
+}
+print bar();
+print "\n";

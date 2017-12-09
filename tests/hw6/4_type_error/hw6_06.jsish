@@ -1,0 +1,6 @@
+  function f()
+  {
+   var f;
+   f();
+  }
+   f();

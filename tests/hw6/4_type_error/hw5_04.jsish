@@ -1,0 +1,6 @@
+ b = undefined;
+ i = 2;
+ if (i >= b)
+ {
+   print i;
+ }

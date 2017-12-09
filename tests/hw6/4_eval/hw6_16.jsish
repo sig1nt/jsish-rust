@@ -1,0 +1,18 @@
+   function f(i)
+   {
+      if (i <= 0)
+      {
+         print (99);
+         print ("\n");
+      }
+      else
+      {
+         print (i);
+         print ("\n");
+         f(i - 1);
+      }
+   }
+   f(3);
+   f(2);
+   print (1);
+   print ("\n");

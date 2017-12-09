@@ -1,0 +1,4 @@
+function f()
+{
+   return if (x > y) { 1; };
+}

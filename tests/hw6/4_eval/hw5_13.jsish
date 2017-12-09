@@ -1,0 +1,23 @@
+{
+i = 0;
+print i > 0 ;
+print "\n";
+print 3 < 5 ;
+print "\n";
+print 3 > 5 ;
+print "\n";
+print 3 == 5 ;
+print "\n";
+print 3 != 5 ;
+print "\n";
+print 3 >= 5 ;
+print "\n";
+print 3 <= 5 ;
+print "\n";
+print 3 <= 5 && 5 <= 22 ;
+print "\n";
+print 3 <= 5 && 5 > 22 ;
+print "\n";
+print 3 < 5 || 5 > 10 ;
+print "\n";
+}

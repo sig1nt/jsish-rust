@@ -1,0 +1,5 @@
+function f() {}
+print (f);
+print ("\n");
+print (function () {});
+print ("\n");

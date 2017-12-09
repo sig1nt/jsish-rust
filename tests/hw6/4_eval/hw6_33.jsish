@@ -1,0 +1,12 @@
+var a, b, c;
+function f(g)
+{
+   var b, c;
+   b = 100;
+   c = 200;
+   a = g();
+}
+
+   b = 1;
+   c = 2;
+   a = f(function () { print (b); print ("\n");  print (c); print ("\n");});
