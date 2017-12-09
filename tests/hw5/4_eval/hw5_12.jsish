@@ -1,0 +1,22 @@
+{
+print 1 + 2 ;
+print "\n";
+print 2 - 7 ;
+print "\n";
+print 1 + 2 - 7 ;
+print "\n";
+{
+print 3 + 2*4 ;
+print "\n";
+{
+print (8 - 7 - 6);
+print "\n";
+print (8 - (7 - 6)) ;
+print "\n";
+}
+print ((8 - 7) - 6) ;
+print "\n";
+}
+print 1 + 2 * 3 + 7 * 4 / 2 * 5 ;
+print "\n";
+}

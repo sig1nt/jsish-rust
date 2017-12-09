@@ -1,0 +1,14 @@
+print 1 + 2 * 3 + -4 / 2 - -9;
+print "\n";
+print (1 + 2) * 3 + -4 / 2 - -9;
+print "\n";
+print 1 + 2 * (3 + -4 / 2) - -9;
+print "\n";
+print 1 + 2 * ((3 + -4) / 2) - -9;
+print "\n";
+print 1 + 2 * 3 + -4 / (2 - -9);
+print "\n";
+print 1 + (2 * 3 + -4) / (2 - -9);
+print "\n";
+print ((1 + 2) * 3 + -4) / (2 - -9);
+print "\n";

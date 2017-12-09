@@ -1,0 +1,13 @@
+i = 5;
+j = 5;
+while (! (i <= 0))
+{
+while (j > 0)
+{
+print j + i;
+print "\n";
+j = j - 1;
+}
+print j + i;
+i = i - 1;
+}

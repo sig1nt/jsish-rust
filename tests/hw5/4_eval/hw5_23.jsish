@@ -1,0 +1,16 @@
+i = undefined;
+j = undefined;
+   print i;
+   print "\n";
+   print j;
+   print "\n";
+   i = 7;
+   print i;
+   print "\n";
+   print j;
+   print "\n";
+   j = 10;
+   print i + j;
+   print "\n";
+   i = true;
+   if (i) { print j; print "\n"; }

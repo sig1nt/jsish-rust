@@ -1,0 +1,12 @@
+id = 3;
+foo = 5;
+print id >= foo;
+print "\n";
+print id <= foo;
+print "\n";
+print id <= foo && foo <= 22;
+print "\n";
+print id <= foo && foo > 22;
+print "\n";
+print id < foo || foo > 10;
+print "\n";
