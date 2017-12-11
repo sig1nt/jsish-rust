@@ -9,6 +9,7 @@ use ast::Statement::*;
 use ast::SourceElement::*;
 use ast::Program::*;
 use ast::BinaryOperator::*;
+use ast::UnaryOperator::*;
 
 fn match_tk(
     itr: &mut FStream,
@@ -85,40 +86,44 @@ fn is_source_element(tk: &Token) -> bool {
 
 
 // Parsing Functions
-fn parse_binary_op(
-    itr: &mut FStream,
-    tk: Token,
-    op_pairs: &Vec<(Token, BinaryOperator)>
-    ) -> JsishResult<(BinaryOperator, Token)> {
+fn search_for_op<'a, T>(
+    tk: &Token,
+    op_pairs: &'a Vec<(Token, T)>
+    ) -> Option<&'a (Token, T)> {
 
-    for &(ref tk1, ref op) in op_pairs {
-        if tk == *tk1 {
-            return Ok((op.clone(), next_token(itr)?));
+    for pair in op_pairs {
+        let &(ref tk1, _) = pair;
+        if *tk == *tk1 {
+            return Some(pair);
         }
     }
 
-    Err(JsishError::from("Could not find token in pair list"))
+    None
 }
 
 fn parse_binary_expression(
     itr: &mut FStream,
     tk: Token,
     parse_opnd: &Fn(&mut FStream, Token) -> JsishResult<(Expression, Token)>,
-    is_opr: &Fn(&Token) -> bool,
     op_pairs: Vec<(Token, BinaryOperator)>
     ) -> JsishResult<(Expression, Token)> {
 
     let (mut lft, tk1) = parse_opnd(itr, tk)?;
     let mut tk_cursor = tk1;
 
-    while is_opr(&tk_cursor) {
-        let (opr, tk2) = parse_binary_op(itr, tk_cursor, &op_pairs)?;
-        let (rht, tk3) = parse_opnd(itr, tk2)?;
+    loop {
+        if let Some(&(_, ref opr)) = search_for_op(&tk_cursor, &op_pairs) {
+            let tk2 = next_token(itr)?;
+            let (rht, tk3) = parse_opnd(itr, tk2.clone())?;
 
-        lft = ExpBinary(ExpBinaryData {opr: opr, lft: Box::new(lft),
-            rht:Box::new(rht)});
+            lft = ExpBinary(ExpBinaryData {opr: opr.clone(), lft: Box::new(lft),
+                rht:Box::new(rht)});
 
-        tk_cursor = tk3;
+            tk_cursor = tk3;
+        }
+        else {
+            break;
+        }
     }
 
     Ok((lft, tk_cursor))
@@ -130,7 +135,6 @@ fn parse_expression(
     ) -> JsishResult<(Expression, Token)> {
 
     parse_binary_expression(itr, tk, &parse_assignment_expression,
-                            &(|x| *x == TkComma),
                             vec![(TkComma, BopComma)])
 }
 
@@ -171,7 +175,6 @@ fn parse_logical_or_expression(
     ) -> JsishResult<(Expression, Token)> {
 
     parse_binary_expression(itr, tk, &parse_logical_and_expression,
-                            &(|x| *x == TkOr),
                             vec![(TkOr, BopOr)])
 }
 
@@ -181,7 +184,6 @@ fn parse_logical_and_expression(
     ) -> JsishResult<(Expression, Token)> {
 
     parse_binary_expression(itr, tk, &parse_equality_expression,
-                            &(|x| *x == TkAnd),
                             vec![(TkAnd, BopAnd)])
 }
 
@@ -191,7 +193,6 @@ fn parse_equality_expression(
     ) -> JsishResult<(Expression, Token)> {
 
     parse_binary_expression(itr, tk, &parse_relational_expression,
-                            &(|x| vec![TkNe, TkEq].contains(x)),
                             vec![(TkNe, BopNe), (TkEq, BopEq)])
 }
 
@@ -201,7 +202,6 @@ fn parse_relational_expression(
     ) -> JsishResult<(Expression, Token)> {
 
     parse_binary_expression(itr, tk, &parse_additive_expression,
-                            &(|x| vec![TkLe, TkLt, TkGt, TkGe].contains(x)),
                             vec![(TkLe, BopLe),
                                  (TkLt, BopLt),
                                  (TkGt, BopGt),
@@ -214,7 +214,6 @@ fn parse_additive_expression(
     ) -> JsishResult<(Expression, Token)> {
 
     parse_binary_expression(itr, tk, &parse_multiplicative_expression,
-                            &(|x| vec![TkPlus, TkMinus].contains(x)),
                             vec![(TkPlus, BopPlus),
                                  (TkMinus, BopMinus)])
 }
@@ -226,7 +225,6 @@ fn parse_multiplicative_expression(
     ) -> JsishResult<(Expression, Token)> {
 
     parse_binary_expression(itr, tk, &parse_unary_expression,
-                            &(|x| vec![TkTimes, TkDivide, TkMod].contains(x)),
                             vec![(TkTimes, BopTimes),
                                  (TkDivide, BopDivide),
                                  (TkMod, BopMod)])
@@ -237,7 +235,19 @@ fn parse_unary_expression(
     tk: Token
     ) -> JsishResult<(Expression, Token)> {
 
-    parse_left_hand_side_expression(itr, tk)
+    let op_pairs = vec![(TkNot, UopNot), (TkTypeof, UopTypeof),
+                        (TkMinus, UopMinus)];
+
+    if let Some(&(_, ref opr)) = search_for_op(&tk, &op_pairs) {
+        let tk1 = next_token(itr)?;
+        let (opnd, tk2) = parse_left_hand_side_expression(itr, tk1)?;
+        Ok((ExpUnary(ExpUnaryData {opr: (*opr).clone(), 
+                                   opnd: Box::new(opnd)}), 
+            tk2))
+    }
+    else {
+        parse_left_hand_side_expression(itr, tk)
+    }
 }
 
 fn parse_left_hand_side_expression(

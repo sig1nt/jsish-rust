@@ -11,7 +11,7 @@ fn main() {
                              .expect("Failed to create file stream");
 
     match parser::parse_stream(&mut itr) {
-        Ok(p) => println!("{:?}", p),
+        Ok(p) => print!("{}", p),
         Err(types::JsishError::Message(e)) => println!("{}", e),
         Err(e) => println!("{}", e)
     }

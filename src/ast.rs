@@ -1,3 +1,5 @@
+use std::fmt;
+
 #[derive(Clone, Debug)]
 pub enum BinaryOperator {
     BopPlus,
@@ -16,11 +18,48 @@ pub enum BinaryOperator {
     BopComma
 }
 
+impl fmt::Display for BinaryOperator {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        use self::BinaryOperator::*;
+        let c = match *self {
+            BopPlus => "+",
+            BopMinus => "-",
+            BopTimes => "*",
+            BopDivide => "/",
+            BopMod => "%",
+            BopEq => "==",
+            BopNe => "!=",
+            BopLt => "<",
+            BopLe => "<=",
+            BopGt => ">",
+            BopGe => ">=",
+            BopAnd => "&&",
+            BopOr => "||",
+            BopComma => ","
+        };
+
+        write!(f, "{}", c)
+    }
+}
+
 #[derive(Clone, Debug)]
 pub enum UnaryOperator {
     UopNot,
     UopTypeof,
     UopMinus
+}
+
+impl fmt::Display for UnaryOperator {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        use self::UnaryOperator::*;
+        let c = match *self {
+            UopNot => "!",
+            UopTypeof => "typeof ",
+            UopMinus => "-"
+        };
+
+        write!(f, "{}", c)
+    }
 }
 
 #[derive(Clone, Debug)]
@@ -55,17 +94,68 @@ pub enum Expression {
     ExpCond(ExpCondData)
 }
 
+impl fmt::Display for Expression {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    use self::Expression::*;
+        match *self {
+            ExpNum(ref n) => write!(f, "{}", n),
+            ExpString(ref s) => write!(f, "\"{}\"", s),
+            ExpTrue => write!(f, "true"),
+            ExpFalse => write!(f, "false"),
+            ExpUndefined => write!(f, "undefined"),
+            ExpBinary(ExpBinaryData {ref opr, ref lft, ref rht}) => 
+                write!(f, "({} {} {})", lft, opr, rht),
+            ExpUnary(ExpUnaryData {ref opr, ref opnd}) =>
+                write!(f, "({}{})", opr, opnd),
+            ExpCond(ExpCondData {ref guard, ref then_exp, ref else_exp}) =>
+                write!(f, "({} ? {} : {})", guard, then_exp, else_exp),
+        }
+    }
+}
+
 #[derive(Clone, Debug)]
 pub enum Statement {
     StExp(Expression)
 }
+
+impl fmt::Display for Statement {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    use self::Statement::*;
+        match *self {
+            StExp(ref exp) => write!(f, "{};", exp)
+        }
+    }
+}
+
 
 #[derive(Clone, Debug)]
 pub enum SourceElement {
     Stmt(Statement)
 }
 
+impl fmt::Display for SourceElement {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        use self::SourceElement::*;
+        match *self {
+            Stmt(ref s) => write!(f, "{}", s)
+        }
+    }
+}
+
 #[derive(Clone, Debug)]
 pub enum Program {
     Prog(Vec<SourceElement>)
+}
+
+impl fmt::Display for Program {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        use self::Program::*;
+        let Prog(ref se_list) = *self;
+
+        for ref se in se_list {
+            write!(f, "{}\n", se)?;
+        }
+
+        Ok(())
+    }
 }
