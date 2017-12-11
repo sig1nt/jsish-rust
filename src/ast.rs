@@ -2,6 +2,7 @@
 pub enum BinaryOperator {
     BopPlus,
     BopMinus,
+    BopTimes,
     BopDivide,
     BopMod,
     BopEq,
@@ -24,22 +25,22 @@ pub enum UnaryOperator {
 
 #[derive(Clone, Debug)]
 pub struct ExpBinaryData {
-    opr: BinaryOperator,
-    lft: Box<Expression>,
-    rht: Box<Expression>
+    pub opr: BinaryOperator,
+    pub lft: Box<Expression>,
+    pub rht: Box<Expression>
 }
 
 #[derive(Clone, Debug)]
 pub struct ExpUnaryData {
-    opr: UnaryOperator,
-    opnd: Box<Expression>
+    pub opr: UnaryOperator,
+    pub opnd: Box<Expression>
 }
 
 #[derive(Clone, Debug)]
 pub struct ExpCondData {
-    guard: Box<Expression>,
-    then_exp: Box<Expression>,
-    else_exp: Box<Expression>
+    pub guard: Box<Expression>,
+    pub then_exp: Box<Expression>,
+    pub else_exp: Box<Expression>
 }
 
 #[derive(Clone, Debug)]
