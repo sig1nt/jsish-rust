@@ -2,17 +2,24 @@ mod ast;
 mod tokenizer;
 mod types;
 mod parser;
+mod interpreter;
 
 use std::env;
 
+use types::JsishResult;
+
 fn main() {
     let args: Vec<String> = env::args().collect();
-    let mut itr = tokenizer::create_file_stream(&args[1])
-                             .expect("Failed to create file stream");
 
-    match parser::parse_stream(&mut itr) {
-        Ok(p) => print!("{}", p),
+    match run_jsish(&args[1]) {
+        Ok(()) => (),
         Err(types::JsishError::Message(e)) => println!("{}", e),
         Err(e) => println!("{}", e)
     }
+}
+
+fn run_jsish(filename: &str) -> JsishResult<()> {
+    let p = parser::parse(filename)?;
+    println!("{:?}", p);
+    interpreter::interpret(p)
 }

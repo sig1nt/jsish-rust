@@ -77,7 +77,7 @@ fn is_expression_statement(tk: &Token) -> bool {
 }
 
 fn is_statement(tk: &Token) -> bool {
-    is_expression_statement(tk)
+    is_expression_statement(tk) || *tk == TkPrint
 }
 
 fn is_source_element(tk: &Token) -> bool {
@@ -308,6 +308,18 @@ fn parse_primary_expression(
     }
 }
 
+fn parse_print_statement(
+    itr: &mut FStream,
+    tk: Token
+    ) -> JsishResult<(Statement, Token)> {
+
+    let tk1 = match_tk(itr, tk, TkPrint)?;
+    let (exp, tk2) = parse_expression(itr, tk1)?;
+    let tk3 = match_tk(itr, tk2, TkSemi)?;
+
+    Ok((StPrint(exp), tk3))
+}
+
 fn parse_expression_statement(
     itr: &mut FStream,
     tk: Token
@@ -324,7 +336,10 @@ fn parse_statement(
     tk: Token
     ) -> JsishResult<(Statement, Token)> {
 
-    if is_expression(&tk) {
+    if tk == TkPrint {
+        parse_print_statement(itr, tk)
+    }
+    else if is_expression(&tk) {
         parse_expression_statement(itr, tk)
     }
     else {

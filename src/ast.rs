@@ -115,14 +115,16 @@ impl fmt::Display for Expression {
 
 #[derive(Clone, Debug)]
 pub enum Statement {
-    StExp(Expression)
+    StExp(Expression),
+    StPrint(Expression)
 }
 
 impl fmt::Display for Statement {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
     use self::Statement::*;
         match *self {
-            StExp(ref exp) => write!(f, "{};", exp)
+            StExp(ref exp) => write!(f, "{};", exp),
+            StPrint(ref exp) => write!(f, "print {};", exp)
         }
     }
 }
