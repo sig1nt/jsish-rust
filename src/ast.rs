@@ -1,6 +1,6 @@
 use std::fmt;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum BinaryOperator {
     BopPlus,
     BopMinus,
@@ -42,7 +42,7 @@ impl fmt::Display for BinaryOperator {
     }
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum UnaryOperator {
     UopNot,
     UopTypeof,
@@ -62,27 +62,27 @@ impl fmt::Display for UnaryOperator {
     }
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct ExpBinaryData {
     pub opr: BinaryOperator,
     pub lft: Box<Expression>,
     pub rht: Box<Expression>
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct ExpUnaryData {
     pub opr: UnaryOperator,
     pub opnd: Box<Expression>
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct ExpCondData {
     pub guard: Box<Expression>,
     pub then_exp: Box<Expression>,
     pub else_exp: Box<Expression>
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum Expression {
     ExpNum(i64),
     ExpString(String),
@@ -113,7 +113,7 @@ impl fmt::Display for Expression {
     }
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum Statement {
     StExp(Expression),
     StPrint(Expression)
@@ -130,7 +130,7 @@ impl fmt::Display for Statement {
 }
 
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum SourceElement {
     Stmt(Statement)
 }
@@ -144,7 +144,7 @@ impl fmt::Display for SourceElement {
     }
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum Program {
     Prog(Vec<SourceElement>)
 }

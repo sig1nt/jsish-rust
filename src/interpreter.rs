@@ -42,6 +42,18 @@ fn value_type_strings(val: &Value) -> String {
     String::from(s)
 }
 
+fn unary_error(
+    symbol: &str,
+    exp: &str,
+    act: Value
+    ) -> JsishError {
+
+    JsishError::from(format!("unary operator '{}' requires {}, found {}",
+                             symbol,
+                             exp,
+                             value_type_strings(&act)))
+}
+
 fn eval_unary_expression(
     opr: UnaryOperator,
     opnd: Expression
@@ -50,9 +62,10 @@ fn eval_unary_expression(
     let val = eval_expression(opnd)?;
     match (opr, val) {
         (UopNot, BoolValue(b)) => Ok(BoolValue(!b)),
+        (UopNot, val) => Err(unary_error("!", "boolean", val)),
         (UopMinus, NumValue(n)) => Ok(NumValue(-n)),
+        (UopMinus, val) => Err(unary_error("-", "number", val)),
         (UopTypeof, v) => Ok(StringValue(value_type_strings(&v))),
-        (opr, val) => Err(JsishError::from(format!("Type Error: {}", opr)))
     }
 }
 
@@ -69,11 +82,53 @@ fn special_divide(num: i64, denom: i64) -> i64 {
     }
 }
 
+fn handle_short_circuit(
+    sc_value: bool,
+    symbol: &str,
+    lft: Expression,
+    rht: Expression
+    ) -> JsishResult<Value> {
+
+    let lft_val = eval_expression(lft)?;
+
+    if let BoolValue(b) = lft_val {
+        if b == sc_value {
+            Ok(BoolValue(sc_value))
+        }
+        else {
+            let rht_val = eval_expression(rht)?;
+            if let BoolValue(b) = rht_val {
+                Ok(BoolValue(b))
+            }
+            else {
+                Err(JsishError::from(format!("operator '{}' requires \
+                                             boolean * boolean, found {} * {}",
+                                             symbol,
+                                             value_type_strings(&lft_val),
+                                             value_type_strings(&rht_val))))
+            }
+        }
+    }
+    else {
+        Err(JsishError::from(format!("operator '{}' requires boolean, found {}",
+                                     symbol,
+                                     value_type_strings(&lft_val))))
+    }
+}
+
 fn eval_binary_expression(
     opr: BinaryOperator,
     lft: Expression,
     rht: Expression
     ) -> JsishResult<Value> {
+
+    if opr == BopAnd {
+        return handle_short_circuit(false, "&&", lft, rht);
+    }
+
+    if opr == BopOr {
+        return handle_short_circuit(true, "||", lft, rht);
+    }
 
     let lft_val = eval_expression(lft)?;
     let rht_val = eval_expression(rht)?;
@@ -83,7 +138,7 @@ fn eval_binary_expression(
         (BopPlus, StringValue(l), StringValue(r)) => Ok(StringValue(l + &r)),
         (BopMinus, NumValue(l), NumValue(r)) => Ok(NumValue(l - r)),
         (BopTimes, NumValue(l), NumValue(r)) => Ok(NumValue(l * r)),
-        (BopDivide, NumValue(l), NumValue(r)) => 
+        (BopDivide, NumValue(l), NumValue(r)) =>
             Ok(NumValue(special_divide(l, r))),
         (BopMod, NumValue(l), NumValue(r)) => Ok(NumValue(l % r)),
         (BopEq, l, r) => Ok(BoolValue(l == r)),
@@ -92,11 +147,19 @@ fn eval_binary_expression(
         (BopGt, NumValue(l), NumValue(r)) => Ok(BoolValue(l > r)),
         (BopGe, NumValue(l), NumValue(r)) => Ok(BoolValue(l >= r)),
         (BopLe, NumValue(l), NumValue(r)) => Ok(BoolValue(l <= r)),
-        (BopAnd, BoolValue(l), BoolValue(r)) => Ok(BoolValue(l && r)),
-        (BopOr, BoolValue(l), BoolValue(r)) => Ok(BoolValue(l || r)),
         (BopComma, _, r) => Ok(r),
-        (opr, left_val, right_val) => 
-            Err(JsishError::from(format!("Type Error: {}", opr)))
+        (BopPlus, l, r) =>
+            Err(JsishError::from(format!("operator '+' requires number * \
+                                         number or string * string, \
+                                         found {} * {}",
+                                         value_type_strings(&l),
+                                         value_type_strings(&r)))),
+        (opr, l, r) =>
+            Err(JsishError::from(format!("operator '{}' requires number * \
+                                         number, found {} * {}",
+                                         opr,
+                                         value_type_strings(&l),
+                                         value_type_strings(&r)))),
     }
 }
 
@@ -109,7 +172,10 @@ fn eval_conditional_expression(
     match eval_expression(guard)? {
         BoolValue(true) => eval_expression(then_exp),
         BoolValue(false) => eval_expression(else_exp),
-        g_val => Err(JsishError::from(format!("Type Error: {}", g_val)))
+        g_val => 
+            Err(JsishError::from(format!("boolean guard required for 'cond' \
+                                         expression, found {}", 
+                                         value_type_strings(&g_val))))
     }
 }
 
@@ -119,7 +185,7 @@ fn eval_expression(exp: Expression) -> JsishResult<Value> {
         ExpString(s) => Ok(StringValue(s)),
         ExpTrue => Ok(BoolValue(true)),
         ExpFalse => Ok(BoolValue(false)),
-        ExpUnary(ExpUnaryData {opr, opnd})  => 
+        ExpUnary(ExpUnaryData {opr, opnd})  =>
             eval_unary_expression(opr, *opnd),
         ExpBinary(ExpBinaryData {opr, lft, rht}) =>
             eval_binary_expression(opr, *lft, *rht),
