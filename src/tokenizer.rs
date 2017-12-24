@@ -1,9 +1,9 @@
 use types::{JsishResult, JsishError, FStream};
 
+use std::fmt;
 use std::fs::File;
 use std::io::prelude::*;
-
-use std::fmt;
+use std::collections::HashMap;
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum Token {
@@ -110,7 +110,6 @@ impl fmt::Display for Token {
 
 use tokenizer::Token::*;
 
-
 fn lookahead (itr: &mut FStream) -> JsishResult<char> {
     // Try and just read the file
     if let Some(&Ok(c)) = itr.peek() {
@@ -126,7 +125,7 @@ fn lookahead (itr: &mut FStream) -> JsishResult<char> {
 }
 
 fn tokenize_symbol(itr: &mut FStream) -> JsishResult<Token> {
-    let single_symbols: Vec<(char, Token)> =
+    let mut single_symbols: HashMap<char, Token> =
        vec![
           ('{', 	TkLbrace),
           ('}', 	TkRbrace),
@@ -144,25 +143,23 @@ fn tokenize_symbol(itr: &mut FStream) -> JsishResult<Token> {
           ('*', 	TkTimes),
           ('/', 	TkDivide),
           ('%', 	TkMod),
-        ]
+        ].into_iter().collect()
     ;
 
-    let opt_eq_symbols: Vec<(char, Token, Token)> =
+    let mut opt_eq_symbols: HashMap<char, (Token, Token)> =
         vec![
-          ('=', TkAssign, TkEq),
-          ('<',	TkLt, TkLe),
-          ('>',	TkGt, TkGe),
-          ('!', TkNot, TkNe),
-       ]
+          ('=', (TkAssign, TkEq)),
+          ('<',	(TkLt, TkLe)),
+          ('>',	(TkGt, TkGe)),
+          ('!', (TkNot, TkNe)),
+       ].into_iter().collect()
     ;
 
     let c = lookahead(itr)?;
 
-    for (k,v) in single_symbols {
-        if k == c {
-            itr.next();
-            return Ok(v);
-        }
+    if let Some(tk) = single_symbols.remove(&c) {
+        itr.next();
+        return Ok(tk);
     }
 
     if c == '&' {
@@ -181,16 +178,14 @@ fn tokenize_symbol(itr: &mut FStream) -> JsishResult<Token> {
         }
     }
 
-    for (k, wo_eq, w_eq) in opt_eq_symbols {
-        if c == k {
+    if let Some((wo_eq, w_eq)) = opt_eq_symbols.remove(&c) {
+        itr.next();
+        if itr.peek().is_some() && lookahead(itr)? == '=' {
             itr.next();
-            if itr.peek().is_some() && lookahead(itr)? == '=' {
-                itr.next();
-                return Ok(w_eq);
-            }
-            else {
-                return Ok(wo_eq);
-            }
+            return Ok(w_eq);
+        }
+        else {
+            return Ok(wo_eq);
         }
     }
 
@@ -198,40 +193,34 @@ fn tokenize_symbol(itr: &mut FStream) -> JsishResult<Token> {
 }
 
 fn recognize_keywords(tk_str: &str) -> Token {
-    let keywords: Vec<(&str, Token)> =
-       vec![
-          ("else", 		TkElse),
-          ("false",		TkFalse),
-          ("function", 	TkFunction),
-          ("if", 		TkIf),
-          ("new", 		TkNew),
-          ("print", 	TkPrint),
-          ("return", 	TkReturn),
-          ("this", 		TkThis),
-          ("true", 		TkTrue),
-          ("typeof", 	TkTypeof),
-          ("undefined", TkUndefined),
-          ("var", 		TkVar),
-          ("while", 	TkWhile),
-          ("gc", 		TkGc),
-          ("inUse", 	TkInUse)
-       ]
-    ;
-
-    for (k,v) in keywords {
-        if k == tk_str {
-            return v;
-        }
+    match tk_str {
+      "else" => 		TkElse,
+      "false" =>		TkFalse,
+      "function" => 	TkFunction,
+      "if" => 		    TkIf,
+      "new" => 		    TkNew,
+      "print" => 	    TkPrint,
+      "return" => 	    TkReturn,
+      "this" => 		TkThis,
+      "true" => 		TkTrue,
+      "typeof" => 	    TkTypeof,
+      "undefined" =>    TkUndefined,
+      "var" => 		    TkVar,
+      "while" => 	    TkWhile,
+      "gc" => 		    TkGc,
+      "inUse" => 	    TkInUse,
+      tk_str =>         TkId(String::from(tk_str))
     }
-
-    return TkId(String::from(tk_str));
 }
 
-fn build_token(itr: &mut FStream, is_valid: &Fn (char) -> bool) -> JsishResult<String>{
+fn build_token(
+    itr: &mut FStream,
+    is_valid: &Fn (char) -> bool
+    ) -> JsishResult<String> {
+
     let mut token_vec = Vec::new();
 
     loop {
-        //println!("tokenize id");
         if is_valid(lookahead(itr)?) {
             token_vec.push(itr.next().expect("Itr Failure")? as u8);
         }
@@ -336,7 +325,6 @@ fn recognize_first_token(itr: &mut FStream) -> JsishResult<Token> {
 
 fn clear_whitespace(itr: &mut FStream) -> () {
     loop {
-        //println!("clear");
         if let Some(&Ok(c)) = itr.peek() {
             if (c as char).is_whitespace() {
                 itr.next();
