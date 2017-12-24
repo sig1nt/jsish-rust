@@ -1,10 +1,7 @@
-mod ast;
-mod tokenizer;
-mod types;
-mod parser;
-mod interpreter;
+extern crate jsish_rust as jsish;
 
 use std::env;
+use jsish::*;
 
 use types::JsishResult;
 

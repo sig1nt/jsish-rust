@@ -26,6 +26,7 @@ fn match_tk(
     }
 }
 
+/*
 fn match_num(itr: &mut FStream, tk: Token) -> JsishResult<(i64, Token)> {
     match tk {
         TkNum(n) => Ok((n, next_token(itr)?)),
@@ -39,6 +40,7 @@ fn match_str(itr: &mut FStream, tk: Token) -> JsishResult<(String, Token)> {
         _ => Err(JsishError::from(format!("expected string, found '{}'", tk)))
     }
 }
+*/
 
 fn match_eof(itr: &mut FStream, tk: Token) -> JsishResult<Token> {
     match tk {
@@ -66,10 +68,6 @@ fn is_expression(tk: &Token) -> bool {
         TkThis => true,
         _ => false
     }
-}
-
-fn is_assignment_expression(tk: &Token) -> bool {
-    is_expression(tk)
 }
 
 fn is_expression_statement(tk: &Token) -> bool {

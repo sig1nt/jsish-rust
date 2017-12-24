@@ -5,7 +5,8 @@ use ast::Expression::*;
 use ast::Statement::*;
 use ast::SourceElement::*;
 use ast::Program::*;
-use ast::BinaryOperator::*;
+// Don't have any Bops implemented yet
+// use ast::BinaryOperator::*;
 use ast::UnaryOperator::*;
 
 use std::fmt;
