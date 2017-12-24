@@ -17,6 +17,6 @@ fn main() {
 
 fn run_jsish(filename: &str) -> JsishResult<()> {
     let p = parser::parse(filename)?;
-    println!("{:?}", p);
+    //println!("{:?}", p);
     interpreter::interpret(p)
 }

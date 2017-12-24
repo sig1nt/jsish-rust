@@ -5,12 +5,12 @@ use ast::Expression::*;
 use ast::Statement::*;
 use ast::SourceElement::*;
 use ast::Program::*;
-// Don't have any Bops implemented yet
-// use ast::BinaryOperator::*;
+use ast::BinaryOperator::*;
 use ast::UnaryOperator::*;
 
 use std::fmt;
 
+#[derive(PartialEq)]
 enum Value {
     NumValue(i64),
     StringValue(String),
@@ -52,7 +52,20 @@ fn eval_unary_expression(
         (UopNot, BoolValue(b)) => Ok(BoolValue(!b)),
         (UopMinus, NumValue(n)) => Ok(NumValue(-n)),
         (UopTypeof, v) => Ok(StringValue(value_type_strings(&v))),
-        _ => Err(JsishError::from("Type Error"))
+        (opr, val) => Err(JsishError::from(format!("Type Error: {}", opr)))
+    }
+}
+
+fn special_divide(num: i64, denom: i64) -> i64 {
+    if denom == 0 {
+        panic!("Cannot divide by zero");
+    }
+
+    if (num.is_negative() || denom.is_negative()) && num % denom != 0 {
+        ((num as f64) / (denom as f64)).floor() as i64
+    }
+    else {
+        num / denom
     }
 }
 
@@ -66,7 +79,37 @@ fn eval_binary_expression(
     let rht_val = eval_expression(rht)?;
 
     match (opr, lft_val, rht_val) {
-        _ => Err(JsishError::from("Type Error"))
+        (BopPlus, NumValue(l), NumValue(r)) => Ok(NumValue(l + r)),
+        (BopPlus, StringValue(l), StringValue(r)) => Ok(StringValue(l + &r)),
+        (BopMinus, NumValue(l), NumValue(r)) => Ok(NumValue(l - r)),
+        (BopTimes, NumValue(l), NumValue(r)) => Ok(NumValue(l * r)),
+        (BopDivide, NumValue(l), NumValue(r)) => 
+            Ok(NumValue(special_divide(l, r))),
+        (BopMod, NumValue(l), NumValue(r)) => Ok(NumValue(l % r)),
+        (BopEq, l, r) => Ok(BoolValue(l == r)),
+        (BopNe, l, r) => Ok(BoolValue(l != r)),
+        (BopLt, NumValue(l), NumValue(r)) => Ok(BoolValue(l < r)),
+        (BopGt, NumValue(l), NumValue(r)) => Ok(BoolValue(l > r)),
+        (BopGe, NumValue(l), NumValue(r)) => Ok(BoolValue(l >= r)),
+        (BopLe, NumValue(l), NumValue(r)) => Ok(BoolValue(l <= r)),
+        (BopAnd, BoolValue(l), BoolValue(r)) => Ok(BoolValue(l && r)),
+        (BopOr, BoolValue(l), BoolValue(r)) => Ok(BoolValue(l || r)),
+        (BopComma, _, r) => Ok(r),
+        (opr, left_val, right_val) => 
+            Err(JsishError::from(format!("Type Error: {}", opr)))
+    }
+}
+
+fn eval_conditional_expression(
+    guard: Expression,
+    then_exp: Expression,
+    else_exp: Expression
+    ) -> JsishResult<Value> {
+
+    match eval_expression(guard)? {
+        BoolValue(true) => eval_expression(then_exp),
+        BoolValue(false) => eval_expression(else_exp),
+        g_val => Err(JsishError::from(format!("Type Error: {}", g_val)))
     }
 }
 
@@ -80,6 +123,8 @@ fn eval_expression(exp: Expression) -> JsishResult<Value> {
             eval_unary_expression(opr, *opnd),
         ExpBinary(ExpBinaryData {opr, lft, rht}) =>
             eval_binary_expression(opr, *lft, *rht),
+        ExpCond(ExpCondData {guard, then_exp, else_exp}) =>
+            eval_conditional_expression(*guard, *then_exp, *else_exp),
         _ => Ok(UndefinedValue)
     }
 }
