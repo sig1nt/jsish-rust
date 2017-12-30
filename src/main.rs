@@ -1,11 +1,10 @@
 extern crate jsish_rust as jsish;
 
-use std::env;
 use std::process;
 use jsish::*;
 
 fn main() {
-    let config = Config::new(env::args()).unwrap_or_else(|err| {
+    let config = Config::new().unwrap_or_else(|err| {
         println!("Problem parsing arguments: {}", err);
         process::exit(1);
     });

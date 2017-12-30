@@ -32,7 +32,9 @@ for f in `find $1/4_type_error -type f | cut -d'.' -f1 | sort | uniq`; do
     cargo run $f.jsish 2> /dev/null | diff $f.correct -
 done
 
-for f in `find $1/5_gc -type f | cut -d'.' -f1 | sort | uniq`; do
-    echo $f.jsish
-    cargo run $f.jsish 2> /dev/null | diff $f.correct -
-done
+if [ -d $1/5_gc ]; then
+    for f in `find $1/5_gc -type f | cut -d'.' -f1 | sort | uniq`; do
+        echo $f.jsish
+        cargo run $f.jsish 2> /dev/null | diff $f.correct -
+    done
+fi

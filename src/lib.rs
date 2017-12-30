@@ -1,3 +1,6 @@
+#[macro_use]
+extern crate clap;
+
 mod tokenizer;
 mod parser;
 mod interpreter;
@@ -6,6 +9,7 @@ mod ast;
 
 use types::*;
 
+#[derive(Debug)]
 enum Mode {
     Ast,
     Print,
@@ -18,21 +22,22 @@ pub struct Config {
 }
 
 impl Config {
-    pub fn new(mut args: std::env::Args) -> JsishResult<Config> {
-        args.next();
+    pub fn new() -> JsishResult<Config> {
+        let matches = clap_app!(jsish =>
+            (@arg AST: -a --ast "print debug-style AST instead of interpretting")
+            (@arg PRINT: -p --print "Pretty print AST instead of interpretting")
+            (@arg FILENAME: +required "Specifies the input file to use")
+        ).get_matches();
 
-        let filename = match args.next() {
-            Some(arg) => arg,
-            None => return Err(JsishError::from("No filename given"))
-        };
+        let filename = String::from(matches.value_of("FILENAME").unwrap());
 
-        let mode = match args.next() {
-            None => Mode::Interpret,
-            Some(arg) => match &arg[..] {
-                "--ast" => Mode::Ast,
-                "--print" => Mode::Print,
-                _ => return Err(JsishError::from("Invalid mode"))
-            }
+        let mode = match (matches.is_present("AST"), 
+                          matches.is_present("PRINT")) {
+            (true, true) => 
+                return Err(JsishError::from("Only specify one mode")),
+            (true, false) => Mode::Ast,
+            (false, true) => Mode::Print,
+            (false, false) => Mode::Interpret
         };
 
         Ok(Config {filename: filename, mode: mode})
