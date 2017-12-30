@@ -1,6 +1,0 @@
-while ((j != 0))
-{
-print j;
-print "\n";
-(j = (j - 1));
-}

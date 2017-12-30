@@ -1,3 +1,0 @@
-j = undefined;
-i = 3;
-b = j > i;

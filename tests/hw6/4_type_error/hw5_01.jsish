@@ -1,3 +1,0 @@
-a = undefined;
-b = undefined;
-a - b;

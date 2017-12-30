@@ -1,9 +1,0 @@
-a = 1;
-b = 2;
-c = a;
-print a;
-print "\n";
-print c;
-print "\n";
-print b;
-print "\n";

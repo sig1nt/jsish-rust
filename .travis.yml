@@ -3,5 +3,6 @@ rust:
     - stable
 cache: cargo
 script:
+    - cargo build --verbose
     - cd tests
     - ./runall hw4
