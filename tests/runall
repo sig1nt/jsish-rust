@@ -15,7 +15,7 @@ fi
 for f in `find $1/1_parser -type f | cut -d'.' -f1 | sort | uniq`; do
     echo $f.jsish
     cargo run $f.jsish 2> /dev/null | diff $f.correct -
-    if [ $? != 0 ]; then
+    if [ $? == 0 ]; then
         exit 1
     fi
 done
