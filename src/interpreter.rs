@@ -257,6 +257,22 @@ fn eval_if_statement(
     Ok(())
 }
 
+fn eval_while_statement(
+    guard: Expression,
+    body: Statement,
+    env: Environment
+    ) -> JsishResult<()> {
+
+    loop {
+        match eval_expression(guard.clone(), env)? {
+            BoolValue(true) => {eval_statement(body.clone(), env)?;},
+            BoolValue(false) => break,
+            _ => return Err(JsishError::from("I'll do this error message eventually"))
+        }
+    }
+    Ok(())
+}
+
 fn eval_statement(
     stmt: Statement,
     env: Environment
@@ -266,8 +282,11 @@ fn eval_statement(
         StPrint(exp) => print!("{}", eval_expression(exp, env)?),
         StExp(exp) => {eval_expression(exp, env)?;},
         StBlock(stmts) => eval_block_statement(stmts, env)?,
-        StIf(StIfData { guard, th, el }) => eval_if_statement(guard, *th, *el, env)?,
-        _ => return Err(JsishError::from("Not yet implemented"))
+        StIf(StIfData { guard, th, el }) =>
+            eval_if_statement(guard, *th, *el, env)?,
+        StWhile(StWhileData { guard, body }) =>
+            eval_while_statement(guard, *body, env)?,
+        // _ => return Err(JsishError::from("Not yet implemented"))
     }
 
     Ok(env)
