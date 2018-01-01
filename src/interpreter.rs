@@ -12,7 +12,7 @@ use std::fmt;
 
 use std::collections::HashMap;
 
-#[derive(PartialEq)]
+#[derive(Clone, PartialEq)]
 enum Value {
     NumValue(i64),
     StringValue(String),
@@ -192,20 +192,54 @@ fn eval_conditional_expression(
     }
 }
 
+fn eval_assignment_expression(
+    lft: Expression,
+    rht: Expression,
+    env: Environment
+    ) -> JsishResult<Value> {
+
+    let rht_value = eval_expression(rht, env)?;
+
+    match lft {
+        ExpId(id) => {env.insert(id, rht_value.clone()); Ok(rht_value)}
+        _ => Err(JsishError::from("unexpected target of assignment\n"))
+    }
+}
+
 fn eval_expression(exp: Expression, env: Environment) -> JsishResult<Value> {
     match exp {
+        ExpId(id) => 
+            match env.get(&id) {
+                None => Err(JsishError::from("Variable not found")),
+                Some(v) => Ok(v.clone())
+            }
         ExpNum(n) => Ok(NumValue(n)),
         ExpString(s) => Ok(StringValue(s)),
         ExpTrue => Ok(BoolValue(true)),
         ExpFalse => Ok(BoolValue(false)),
+        ExpUndefined => Ok(UndefinedValue),
         ExpUnary(ExpUnaryData {opr, opnd})  =>
             eval_unary_expression(opr, *opnd, env),
         ExpBinary(ExpBinaryData {opr, lft, rht}) =>
             eval_binary_expression(opr, *lft, *rht, env),
         ExpCond(ExpCondData {guard, then_exp, else_exp}) =>
             eval_conditional_expression(*guard, *then_exp, *else_exp, env),
+        ExpAssign(ExpAssignData {lft, rht}) =>
+            eval_assignment_expression(*lft, *rht, env),
         _ => Ok(UndefinedValue)
     }
+}
+
+fn eval_block_statement(
+    stmts: Vec<Statement>,
+    env: Environment
+    ) -> JsishResult<()> {
+
+    for stmt in stmts {
+        eval_statement(stmt, env)?;
+    }
+
+    Ok(())
 }
 
 fn eval_statement(
@@ -215,7 +249,8 @@ fn eval_statement(
 
     match stmt {
         StPrint(exp) => print!("{}", eval_expression(exp, env)?),
-        StExp(exp) => {eval_expression(exp, env)?; ()},
+        StExp(exp) => {eval_expression(exp, env)?;},
+        StBlock(stmts) => eval_block_statement(stmts, env)?,
         _ => return Err(JsishError::from("Not yet implemented"))
     }
 
