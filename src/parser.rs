@@ -26,22 +26,6 @@ fn match_tk(
     }
 }
 
-/*
-fn match_num(itr: &mut FStream, tk: Token) -> JsishResult<(i64, Token)> {
-    match tk {
-        TkNum(n) => Ok((n, next_token(itr)?)),
-        _ => Err(JsishError::from(format!("expected number, found '{}'", tk)))
-    }
-}
-
-fn match_str(itr: &mut FStream, tk: Token) -> JsishResult<(String, Token)> {
-    match tk {
-        TkString(s) => Ok((s, next_token(itr)?)),
-        _ => Err(JsishError::from(format!("expected string, found '{}'", tk)))
-    }
-}
-*/
-
 fn match_eof(itr: &mut FStream, tk: Token) -> JsishResult<Token> {
     match tk {
         TkEof => Ok(next_token(itr)?),
@@ -72,6 +56,13 @@ fn is_expression(tk: &Token) -> bool {
 
 fn is_expression_statement(tk: &Token) -> bool {
     TkFunction != *tk && TkLbrace != *tk && is_expression(tk)
+}
+
+fn is_valid_lhs(tk: &Expression) -> bool {
+    match tk {
+        &ExpId(_) => true,
+        _ => false
+    }
 }
 
 fn is_statement(tk: &Token) -> bool {
@@ -141,8 +132,20 @@ fn parse_assignment_expression(
     tk: Token
     ) -> JsishResult<(Expression, Token)> {
 
-    parse_conditional_expression(itr, tk)
+    let (lhs, tk1) = parse_conditional_expression(itr, tk)?;
 
+    if tk1 != TkAssign {
+        Ok((lhs, tk1))
+    } 
+    else if !is_valid_lhs(&lhs) {
+        Err(JsishError::from("unexpected token '='"))
+    }
+    else {
+        let tk2 = match_tk(itr, tk1, TkAssign)?;
+        let (rhs, tk3) = parse_assignment_expression(itr, tk2)?;
+        Ok(((ExpAssign(ExpAssignData {lft: Box::new(lhs), 
+            rht: Box::new(rhs)})), tk3))
+    }
 }
 
 fn parse_conditional_expression(
@@ -294,15 +297,18 @@ fn parse_primary_expression(
     }
     else {
         let exp = match tk {
-            TkNum(n) => Ok(ExpNum(n)),
-            TkTrue => Ok(ExpTrue),
-            TkFalse => Ok(ExpFalse),
-            TkString(s) => Ok(ExpString(s)),
-            TkUndefined => Ok(ExpUndefined),
-            _ => Err(JsishError::from(format!("expected 'value', found '{}'", tk)))
+            TkId(s) => ExpId(s),
+            TkNum(n) => ExpNum(n),
+            TkTrue => ExpTrue,
+            TkFalse => ExpFalse,
+            TkString(s) => ExpString(s),
+            TkUndefined => ExpUndefined,
+            _ => 
+                return Err(JsishError::from(
+                        format!("expected 'value', found '{}'", tk)))
         };
 
-        Ok((exp?, next_token(itr)?))
+        Ok((exp, next_token(itr)?))
     }
 }
 
@@ -345,13 +351,30 @@ fn parse_statement(
     }
 }
 
+// fn parse_variable_elements(
+//     itr: &mut FStream,
+//     tk: Token
+//     ) -> JsishResult<(Vec<Declaration>, Token)> {
+
+//     let mut decls: Vec<Declaration> = Vec::new();
+//     let tk1 = match_tk(itr, tk, TkVar)?;
+
+//     Err(JsishError::from("Expected declaration"))
+// }
+
 fn parse_source_element(
     itr: &mut FStream,
     tk: Token
     ) -> JsishResult<(SourceElement, Token)> {
 
-    let (stmt, tk1) = parse_statement(itr, tk)?;
-    Ok((Stmt(stmt), tk1))
+    // if tk == TkVar {
+    //     let (decl, tk1) = parse_variable_elements(itr, tk)?;
+    //     Ok((VarDecl(decl), tk1))
+    // }
+    // else {
+        let (stmt, tk1) = parse_statement(itr, tk)?;
+        Ok((Stmt(stmt), tk1))
+    // }
 }
 
 fn parse_program(

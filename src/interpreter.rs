@@ -10,6 +10,8 @@ use ast::UnaryOperator::*;
 
 use std::fmt;
 
+use std::collections::HashMap;
+
 #[derive(PartialEq)]
 enum Value {
     NumValue(i64),
@@ -30,6 +32,13 @@ impl fmt::Display for Value {
         }
     }
 }
+
+type Environment<'a> = &'a mut HashMap<String, Value>;
+
+// struct Result<'a> {
+//     val: Value,
+//     env: Environment<'a>
+// }
 
 fn value_type_strings(val: &Value) -> String {
     let s = match *val {
@@ -56,10 +65,11 @@ fn unary_error(
 
 fn eval_unary_expression(
     opr: UnaryOperator,
-    opnd: Expression
+    opnd: Expression,
+    env: Environment
     ) -> JsishResult<Value> {
 
-    let val = eval_expression(opnd)?;
+    let val = eval_expression(opnd, env)?;
     match (opr, val) {
         (UopNot, BoolValue(b)) => Ok(BoolValue(!b)),
         (UopNot, val) => Err(unary_error("!", "boolean", val)),
@@ -86,17 +96,18 @@ fn handle_short_circuit(
     sc_value: bool,
     symbol: &str,
     lft: Expression,
-    rht: Expression
+    rht: Expression,
+    env: Environment
     ) -> JsishResult<Value> {
 
-    let lft_val = eval_expression(lft)?;
+    let lft_val = eval_expression(lft, env)?;
 
     if let BoolValue(b) = lft_val {
         if b == sc_value {
             Ok(BoolValue(sc_value))
         }
         else {
-            let rht_val = eval_expression(rht)?;
+            let rht_val = eval_expression(rht, env)?;
             if let BoolValue(b) = rht_val {
                 Ok(BoolValue(b))
             }
@@ -119,19 +130,20 @@ fn handle_short_circuit(
 fn eval_binary_expression(
     opr: BinaryOperator,
     lft: Expression,
-    rht: Expression
+    rht: Expression,
+    env: Environment
     ) -> JsishResult<Value> {
 
     if opr == BopAnd {
-        return handle_short_circuit(false, "&&", lft, rht);
+        return handle_short_circuit(false, "&&", lft, rht, env);
     }
 
     if opr == BopOr {
-        return handle_short_circuit(true, "||", lft, rht);
+        return handle_short_circuit(true, "||", lft, rht, env);
     }
 
-    let lft_val = eval_expression(lft)?;
-    let rht_val = eval_expression(rht)?;
+    let lft_val = eval_expression(lft, env)?;
+    let rht_val = eval_expression(rht, env)?;
 
     match (opr, lft_val, rht_val) {
         (BopPlus, NumValue(l), NumValue(r)) => Ok(NumValue(l + r)),
@@ -166,58 +178,71 @@ fn eval_binary_expression(
 fn eval_conditional_expression(
     guard: Expression,
     then_exp: Expression,
-    else_exp: Expression
+    else_exp: Expression,
+    env: Environment
     ) -> JsishResult<Value> {
 
-    match eval_expression(guard)? {
-        BoolValue(true) => eval_expression(then_exp),
-        BoolValue(false) => eval_expression(else_exp),
-        g_val => 
+    match eval_expression(guard, env)? {
+        BoolValue(true) => eval_expression(then_exp, env),
+        BoolValue(false) => eval_expression(else_exp, env),
+        g_val =>
             Err(JsishError::from(format!("boolean guard required for 'cond' \
-                                         expression, found {}", 
+                                         expression, found {}",
                                          value_type_strings(&g_val))))
     }
 }
 
-fn eval_expression(exp: Expression) -> JsishResult<Value> {
+fn eval_expression(exp: Expression, env: Environment) -> JsishResult<Value> {
     match exp {
         ExpNum(n) => Ok(NumValue(n)),
         ExpString(s) => Ok(StringValue(s)),
         ExpTrue => Ok(BoolValue(true)),
         ExpFalse => Ok(BoolValue(false)),
         ExpUnary(ExpUnaryData {opr, opnd})  =>
-            eval_unary_expression(opr, *opnd),
+            eval_unary_expression(opr, *opnd, env),
         ExpBinary(ExpBinaryData {opr, lft, rht}) =>
-            eval_binary_expression(opr, *lft, *rht),
+            eval_binary_expression(opr, *lft, *rht, env),
         ExpCond(ExpCondData {guard, then_exp, else_exp}) =>
-            eval_conditional_expression(*guard, *then_exp, *else_exp),
+            eval_conditional_expression(*guard, *then_exp, *else_exp, env),
         _ => Ok(UndefinedValue)
     }
 }
 
-fn eval_statement(stmt: Statement) -> JsishResult<()> {
+fn eval_statement(
+    stmt: Statement,
+    env: Environment
+    ) -> JsishResult<(Environment)> {
+
     match stmt {
-        StPrint(exp) => Ok(print!("{}", eval_expression(exp)?)),
-        StExp(exp) => {eval_expression(exp)?; Ok(())}
+        StPrint(exp) => print!("{}", eval_expression(exp, env)?),
+        StExp(exp) => {eval_expression(exp, env)?; ()}
     }
+
+    Ok(env)
 }
 
-fn eval_source_element(se: SourceElement) -> JsishResult<()> {
+fn eval_source_element(
+    se: SourceElement,
+    env: Environment
+    ) -> JsishResult<(Environment)> {
+
     match se {
-        Stmt(s) => eval_statement(s)
+        Stmt(s) => eval_statement(s, env)
     }
 }
 
-fn eval_program(prog: Program) -> JsishResult<()>{
+fn eval_program(prog: Program, env: Environment) -> JsishResult<Environment>{
     let Prog(ses) = prog;
 
     for se in ses {
-        eval_source_element(se)?;
+        eval_source_element(se, env)?;
     }
 
-    Ok(())
+    Ok(env)
 }
 
 pub fn interpret(p: Program) -> JsishResult<()> {
-    eval_program(p)
+    let mut tle = HashMap::new();
+    eval_program(p, &mut tle)?;
+    Ok(())
 }

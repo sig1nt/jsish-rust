@@ -1,5 +1,0 @@
-(typeof undefined);
-(typeof "Hello.");
-(typeof true);
-(typeof false);
-(typeof 47);

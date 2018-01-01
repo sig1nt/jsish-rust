@@ -63,6 +63,18 @@ impl fmt::Display for UnaryOperator {
 }
 
 #[derive(Clone, Debug, PartialEq)]
+pub struct DeclInitData {
+    pub id: String,
+    pub src: Box<Expression>
+}
+
+#[derive(Clone, Debug, PartialEq)]
+pub enum Declaration {
+    DeclId(String),
+    DeclInit(DeclInitData)
+}
+
+#[derive(Clone, Debug, PartialEq)]
 pub struct ExpBinaryData {
     pub opr: BinaryOperator,
     pub lft: Box<Expression>,
@@ -83,7 +95,14 @@ pub struct ExpCondData {
 }
 
 #[derive(Clone, Debug, PartialEq)]
+pub struct ExpAssignData {
+    pub lft: Box<Expression>,
+    pub rht: Box<Expression>
+}
+
+#[derive(Clone, Debug, PartialEq)]
 pub enum Expression {
+    ExpId(String),
     ExpNum(i64),
     ExpString(String),
     ExpTrue,
@@ -91,24 +110,28 @@ pub enum Expression {
     ExpUndefined,
     ExpBinary(ExpBinaryData),
     ExpUnary(ExpUnaryData),
-    ExpCond(ExpCondData)
+    ExpCond(ExpCondData),
+    ExpAssign(ExpAssignData)
 }
 
 impl fmt::Display for Expression {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
     use self::Expression::*;
         match *self {
+            ExpId(ref s) => write!(f, "{}", s),
             ExpNum(ref n) => write!(f, "{}", n),
             ExpString(ref s) => write!(f, "\"{}\"", s),
             ExpTrue => write!(f, "true"),
             ExpFalse => write!(f, "false"),
             ExpUndefined => write!(f, "undefined"),
-            ExpBinary(ExpBinaryData {ref opr, ref lft, ref rht}) => 
+            ExpBinary(ExpBinaryData {ref opr, ref lft, ref rht}) =>
                 write!(f, "({} {} {})", lft, opr, rht),
             ExpUnary(ExpUnaryData {ref opr, ref opnd}) =>
                 write!(f, "({}{})", opr, opnd),
             ExpCond(ExpCondData {ref guard, ref then_exp, ref else_exp}) =>
                 write!(f, "({} ? {} : {})", guard, then_exp, else_exp),
+            ExpAssign(ExpAssignData {ref lft, ref rht}) =>
+                write!(f, "({} = {})", lft, rht),
         }
     }
 }
@@ -132,7 +155,8 @@ impl fmt::Display for Statement {
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum SourceElement {
-    Stmt(Statement)
+    Stmt(Statement),
+    // VarDecl(Vec<Declaration>)
 }
 
 impl fmt::Display for SourceElement {
