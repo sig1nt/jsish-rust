@@ -11,8 +11,8 @@ fn main() {
 
     if let Err(e) = run(config) {
         match e {
-            jsish::types::JsishError::Message(e) => println!("{}", e),
-            e => println!("{}", e)
+            jsish::types::JsishError::Message(e) => eprintln!("{}", e),
+            e => eprintln!("{}", e)
         }
     }
 }

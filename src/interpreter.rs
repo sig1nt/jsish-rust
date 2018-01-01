@@ -208,9 +208,10 @@ fn eval_assignment_expression(
 
 fn eval_expression(exp: Expression, env: Environment) -> JsishResult<Value> {
     match exp {
-        ExpId(id) => 
+        ExpId(id) =>
             match env.get(&id) {
-                None => Err(JsishError::from("Variable not found")),
+                None => Err(JsishError::from(
+                        format!("variable '{}' not found", id))),
                 Some(v) => Ok(v.clone())
             }
         ExpNum(n) => Ok(NumValue(n)),
@@ -226,7 +227,7 @@ fn eval_expression(exp: Expression, env: Environment) -> JsishResult<Value> {
             eval_conditional_expression(*guard, *then_exp, *else_exp, env),
         ExpAssign(ExpAssignData {lft, rht}) =>
             eval_assignment_expression(*lft, *rht, env),
-        _ => Ok(UndefinedValue)
+        // _ => Ok(UndefinedValue)
     }
 }
 
@@ -252,7 +253,11 @@ fn eval_if_statement(
     match eval_expression(guard, env)? {
         BoolValue(true) => {eval_statement(th, env)?;},
         BoolValue(false) => {eval_statement(el, env)?;},
-        _ => return Err(JsishError::from("I'll do this error message eventually"))
+        g_val =>
+            return Err(JsishError::from(
+                    format!("boolean guard required for 'if' statement, \
+                            found {}",
+                            value_type_strings(&g_val))))
     }
     Ok(())
 }
@@ -267,7 +272,11 @@ fn eval_while_statement(
         match eval_expression(guard.clone(), env)? {
             BoolValue(true) => {eval_statement(body.clone(), env)?;},
             BoolValue(false) => break,
-            _ => return Err(JsishError::from("I'll do this error message eventually"))
+            g_val =>
+                return Err(JsishError::from(
+                        format!("boolean guard required for 'while' \
+                                statement, found {}",
+                                value_type_strings(&g_val))))
         }
     }
     Ok(())

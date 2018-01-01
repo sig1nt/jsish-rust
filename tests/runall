@@ -3,7 +3,9 @@
 for hw_dir in "$@"; do
     for f in `find $hw_dir/1_parser -type f | cut -d'.' -f1 | sort | uniq`; do
         echo $f.jsish
-        cargo run $f.jsish 2> /dev/null | diff $f.correct -
+        cargo run -q $f.jsish > tmp.out 2> tmp.err; 
+        cat tmp.err tmp.out | diff $f.correct -
+        rm tmp.out tmp.err
         if [ $? != 0 ]; then
             exit 1
         fi
@@ -11,7 +13,9 @@ for hw_dir in "$@"; do
 
     for f in `find $hw_dir/2_3_ast_echo -type f | cut -d'.' -f1 | sort | uniq`; do
         echo $f.jsish
-        cargo run -- $f.jsish --print 2> /dev/null | diff $f.correct -
+        cargo run -q -- --print $f.jsish > tmp.out 2> tmp.err; 
+        cat tmp.err tmp.out | diff $f.correct -
+        rm tmp.out tmp.err
         if [ $? != 0 ]; then
             exit 1
         fi
@@ -19,7 +23,9 @@ for hw_dir in "$@"; do
 
     for f in `find $hw_dir/4_eval -type f | cut -d'.' -f1 | sort | uniq`; do
         echo $f.jsish
-        cargo run $f.jsish 2> /dev/null | diff $f.correct -
+        cargo run -q $f.jsish > tmp.out 2> tmp.err; 
+        cat tmp.err tmp.out | diff $f.correct -
+        rm tmp.out tmp.err
         if [ $? != 0 ]; then
             exit 1
         fi
@@ -27,7 +33,9 @@ for hw_dir in "$@"; do
 
     for f in `find $hw_dir/4_type_error -type f | cut -d'.' -f1 | sort | uniq`; do
         echo $f.jsish
-        cargo run $f.jsish 2> /dev/null | diff $f.correct -
+        cargo run -q $f.jsish > tmp.out 2> tmp.err; 
+        cat tmp.err tmp.out | diff $f.correct -
+        rm tmp.out tmp.err
         if [ $? != 0 ]; then
             exit 1
         fi
@@ -36,7 +44,9 @@ for hw_dir in "$@"; do
     if [ -d $hw_dir/5_gc ]; then
         for f in `find $hw_dir/5_gc -type f | cut -d'.' -f1 | sort | uniq`; do
             echo $f.jsish
-            cargo run $f.jsish 2> /dev/null | diff $f.correct -
+            cargo run -q $f.jsish > tmp.out 2> tmp.err; 
+            cat tmp.err tmp.out | diff $f.correct -
+            rm tmp.out tmp.err
             if [ $? != 0 ]; then
                 exit 1
             fi
