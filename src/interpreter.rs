@@ -215,7 +215,8 @@ fn eval_statement(
 
     match stmt {
         StPrint(exp) => print!("{}", eval_expression(exp, env)?),
-        StExp(exp) => {eval_expression(exp, env)?; ()}
+        StExp(exp) => {eval_expression(exp, env)?; ()},
+        _ => return Err(JsishError::from("Not yet implemented"))
     }
 
     Ok(env)

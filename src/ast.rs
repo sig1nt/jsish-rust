@@ -137,9 +137,25 @@ impl fmt::Display for Expression {
 }
 
 #[derive(Clone, Debug, PartialEq)]
+pub struct StIfData {
+    pub guard: Expression,
+    pub th: Box<Statement>,
+    pub el: Box<Statement>
+}
+
+#[derive(Clone, Debug, PartialEq)]
+pub struct StWhileData {
+    pub guard: Expression,
+    pub body: Box<Statement>
+}
+
+#[derive(Clone, Debug, PartialEq)]
 pub enum Statement {
     StExp(Expression),
-    StPrint(Expression)
+    StPrint(Expression),
+    StBlock(Vec<Statement>),
+    StIf(StIfData),
+    StWhile(StWhileData)
 }
 
 impl fmt::Display for Statement {
@@ -147,7 +163,18 @@ impl fmt::Display for Statement {
     use self::Statement::*;
         match *self {
             StExp(ref exp) => write!(f, "{};", exp),
-            StPrint(ref exp) => write!(f, "print {};", exp)
+            StPrint(ref exp) => write!(f, "print {};", exp),
+            StBlock(ref list) => {
+                write!(f, "{}", "{")?;
+                for stmt in list {
+                    write!(f, "{}\n", stmt)?;
+                }
+                write!(f, "{}", "}")
+            }
+            StIf(StIfData { ref guard, ref th, ref el }) =>
+                write!(f, "if ({}) {}\n{}", guard, th, el),
+            StWhile(StWhileData { ref guard, ref body }) =>
+                write!(f, "if ({}) {}", guard, body)
         }
     }
 }

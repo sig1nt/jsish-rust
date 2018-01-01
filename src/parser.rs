@@ -66,7 +66,13 @@ fn is_valid_lhs(tk: &Expression) -> bool {
 }
 
 fn is_statement(tk: &Token) -> bool {
-    is_expression_statement(tk) || *tk == TkPrint
+    match tk {
+        &TkPrint => true,
+        &TkLbrace => true,
+        &TkIf => true,
+        &TkWhile => true,
+        tk => is_expression_statement(tk)
+    }
 }
 
 fn is_source_element(tk: &Token) -> bool {
@@ -89,6 +95,27 @@ fn search_for_op<'a, T>(
 
     None
 }
+
+fn parse_repetition<T>(
+    itr: &mut FStream,
+    tk: Token,
+    pred: &Fn(&Token) -> bool,
+    parse_single: &Fn(&mut FStream, Token) -> JsishResult<(T, Token)>
+    ) -> JsishResult<(Vec<T>, Token)> {
+
+    let mut elems: Vec<T> = Vec::new();
+    let mut tk_cursor = tk;
+
+    while pred(&tk_cursor) {
+        let (elem, tk_temp) = parse_single(itr, tk_cursor)?;
+        elems.push(elem);
+        tk_cursor = tk_temp;
+    }
+
+    Ok((elems, tk_cursor))
+}
+
+
 
 fn parse_binary_expression(
     itr: &mut FStream,
@@ -335,6 +362,62 @@ fn parse_expression_statement(
     Ok((StExp(exp), tk2))
 }
 
+fn parse_block_statement(
+    itr: &mut FStream,
+    tk: Token
+    ) -> JsishResult<(Statement, Token)> {
+
+    let tk1 = match_tk(itr, tk, TkLbrace)?;
+    let (stmts, tk2) = parse_repetition(itr,
+                                        tk1,
+                                        &is_statement,
+                                        &parse_statement)?;
+    let tk3 = match_tk(itr, tk2, TkRbrace)?;
+    Ok((StBlock(stmts), tk3))
+}
+
+fn parse_else(
+    itr: &mut FStream,
+    tk: Token
+    ) -> JsishResult<(Statement, Token)> {
+
+    if tk == TkElse {
+        let tk1 = match_tk(itr, tk, TkElse)?;
+        parse_block_statement(itr, tk1)
+    }
+    else {
+        Ok((StBlock(Vec::new()), tk))
+    }
+}
+
+fn parse_if_statement(
+    itr: &mut FStream,
+    tk: Token
+    ) -> JsishResult<(Statement, Token)> {
+
+    let tk1 = match_tk(itr, tk, TkIf)?;
+    let tk2 = match_tk(itr, tk1, TkLparen)?;
+    let (guard, tk3) = parse_expression(itr, tk2)?;
+    let tk4 = match_tk(itr, tk3, TkRparen)?;
+    let (th, tk5) = parse_block_statement(itr, tk4)?;
+    let (el, tk6) = parse_else(itr, tk5)?;
+    Ok(((StIf(StIfData {guard: guard, th: Box::new(th), el: Box::new(el)})),
+        tk6))
+}
+
+fn parse_while_statement(
+    itr: &mut FStream,
+    tk: Token
+    ) -> JsishResult<(Statement, Token)> {
+
+    let tk1 = match_tk(itr, tk, TkWhile)?;
+    let tk2 = match_tk(itr, tk1, TkLparen)?;
+    let (guard, tk3) = parse_expression(itr, tk2)?;
+    let tk4 = match_tk(itr, tk3, TkRparen)?;
+    let (th, tk5) = parse_block_statement(itr, tk4)?;
+    Ok(((StWhile(StWhileData {guard: guard, body: Box::new(th)})), tk5))
+}
+
 fn parse_statement(
     itr: &mut FStream,
     tk: Token
@@ -342,6 +425,15 @@ fn parse_statement(
 
     if tk == TkPrint {
         parse_print_statement(itr, tk)
+    }
+    else if tk == TkLbrace {
+        parse_block_statement(itr, tk)
+    }
+    else if tk == TkIf {
+        parse_if_statement(itr, tk)
+    }
+    else if tk == TkWhile {
+        parse_while_statement(itr, tk)
     }
     else if is_expression(&tk) {
         parse_expression_statement(itr, tk)
@@ -382,18 +474,14 @@ fn parse_program(
     tk: Token
     ) -> JsishResult<(Program, Token)> {
 
-    let mut elems: Vec<SourceElement> = Vec::new();
-    let mut tk_cursor = tk;
+    let (elems, tk1) = parse_repetition(itr,
+                                        tk,
+                                        &is_source_element,
+                                        &parse_source_element)?;
 
-    while is_source_element(&tk_cursor) {
-        let (elem, tk_temp) = parse_source_element(itr, tk_cursor)?;
-        elems.push(elem);
-        tk_cursor = tk_temp;
-    }
+    let tk2 = match_eof(itr, tk1)?;
 
-    let tk1 = match_eof(itr, tk_cursor)?;
-
-    Ok((Prog(elems), tk1))
+    Ok((Prog(elems), tk2))
 }
 
 pub fn parse_stream(itr: &mut FStream) -> JsishResult<Program>{
