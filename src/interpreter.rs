@@ -242,6 +242,21 @@ fn eval_block_statement(
     Ok(())
 }
 
+fn eval_if_statement(
+    guard: Expression,
+    th: Statement,
+    el: Statement,
+    env: Environment
+    ) -> JsishResult<()> {
+
+    match eval_expression(guard, env)? {
+        BoolValue(true) => {eval_statement(th, env)?;},
+        BoolValue(false) => {eval_statement(el, env)?;},
+        _ => return Err(JsishError::from("I'll do this error message eventually"))
+    }
+    Ok(())
+}
+
 fn eval_statement(
     stmt: Statement,
     env: Environment
@@ -251,6 +266,7 @@ fn eval_statement(
         StPrint(exp) => print!("{}", eval_expression(exp, env)?),
         StExp(exp) => {eval_expression(exp, env)?;},
         StBlock(stmts) => eval_block_statement(stmts, env)?,
+        StIf(StIfData { guard, th, el }) => eval_if_statement(guard, *th, *el, env)?,
         _ => return Err(JsishError::from("Not yet implemented"))
     }
 
