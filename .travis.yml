@@ -10,4 +10,4 @@ cache: cargo
 script:
     - cargo build --verbose
     - cd tests
-    - ./runall hw4
+    - ./runall hw4 hw5
