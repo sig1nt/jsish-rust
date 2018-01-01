@@ -68,11 +68,11 @@ pub struct DeclInitData {
     pub src: Box<Expression>
 }
 
-#[derive(Clone, Debug, PartialEq)]
-pub enum Declaration {
-    DeclId(String),
-    DeclInit(DeclInitData)
-}
+// #[derive(Clone, Debug, PartialEq)]
+// pub enum Declaration {
+//     DeclId(String),
+//     DeclInit(DeclInitData)
+// }
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct ExpBinaryData {
@@ -120,7 +120,7 @@ impl fmt::Display for Expression {
         match *self {
             ExpId(ref s) => write!(f, "{}", s),
             ExpNum(ref n) => write!(f, "{}", n),
-            ExpString(ref s) => write!(f, "\"{}\"", s),
+            ExpString(ref s) => write!(f, "{:?}", s),
             ExpTrue => write!(f, "true"),
             ExpFalse => write!(f, "false"),
             ExpUndefined => write!(f, "undefined"),
@@ -165,16 +165,16 @@ impl fmt::Display for Statement {
             StExp(ref exp) => write!(f, "{};", exp),
             StPrint(ref exp) => write!(f, "print {};", exp),
             StBlock(ref list) => {
-                write!(f, "{}", "{")?;
+                write!(f, "{}", "{\n")?;
                 for stmt in list {
                     write!(f, "{}\n", stmt)?;
                 }
                 write!(f, "{}", "}")
             }
             StIf(StIfData { ref guard, ref th, ref el }) =>
-                write!(f, "if ({}) {}\n{}", guard, th, el),
+                write!(f, "if ({})\n{}\nelse\n{}", guard, th, el),
             StWhile(StWhileData { ref guard, ref body }) =>
-                write!(f, "if ({}) {}", guard, body)
+                write!(f, "while ({})\n{}", guard, body),
         }
     }
 }
