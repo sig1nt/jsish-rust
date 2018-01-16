@@ -10,6 +10,7 @@ use ast::SourceElement::*;
 use ast::Program::*;
 use ast::BinaryOperator::*;
 use ast::UnaryOperator::*;
+use ast::Declaration::*;
 
 fn match_tk(
     itr: &mut FStream,
@@ -30,6 +31,14 @@ fn match_eof(itr: &mut FStream, tk: Token) -> JsishResult<Token> {
     match tk {
         TkEof => Ok(next_token(itr)?),
         _ => Err(JsishError::from(format!("expected 'eof', found '{}'", tk)))
+    }
+}
+
+fn match_id(itr: &mut FStream, tk: Token) -> JsishResult<(String, Token)> {
+    match tk {
+        TkId(s) => Ok((s, next_token(itr)?)),
+        _ => Err(JsishError::from(
+                format!("expected 'identifier', found '{}'", tk)))
     }
 }
 
@@ -76,7 +85,7 @@ fn is_statement(tk: &Token) -> bool {
 }
 
 fn is_source_element(tk: &Token) -> bool {
-    is_statement(tk)
+    is_statement(tk) || *tk == TkVar
 }
 
 
@@ -115,7 +124,20 @@ fn parse_repetition<T>(
     Ok((elems, tk_cursor))
 }
 
+fn parse_comma_repetition<T>(
+    itr: &mut FStream,
+    tk: Token,
+    parse_single: &Fn(&mut FStream, Token) -> JsishResult<(T, Token)>
+    ) -> JsishResult<(Vec<T>, Token)> {
+    let parse_with_comma = { |itr: &mut FStream, tk: Token|
+        parse_single(itr,
+                     match_tk(itr, tk, TkComma)?)};
 
+    parse_repetition(itr,
+                     tk,
+                     &(|x| *x == TkComma),
+                     &parse_with_comma)
+}
 
 fn parse_binary_expression(
     itr: &mut FStream,
@@ -443,30 +465,52 @@ fn parse_statement(
     }
 }
 
-// fn parse_variable_elements(
-//     itr: &mut FStream,
-//     tk: Token
-//     ) -> JsishResult<(Vec<Declaration>, Token)> {
+fn parse_variable_element(
+    itr: &mut FStream,
+    tk: Token
+    ) -> JsishResult<(Declaration, Token)> {
 
-//     let mut decls: Vec<Declaration> = Vec::new();
-//     let tk1 = match_tk(itr, tk, TkVar)?;
+    let (id, tk1) = match_id(itr, tk)?;
 
-//     Err(JsishError::from("Expected declaration"))
-// }
+    if tk1 == TkAssign {
+        let tk2 = match_tk(itr, tk1, TkAssign)?;
+        let (src, tk3) = parse_assignment_expression(itr, tk2)?;
+        Ok((DeclInit(DeclInitData {id: id, src: Box::new(src)}), tk3))
+    }
+    else {
+        Ok((DeclId(id), tk1))
+    }
+}
+
+fn parse_variable_elements(
+    itr: &mut FStream,
+    tk: Token
+    ) -> JsishResult<(Vec<Declaration>, Token)> {
+
+    let tk1 = match_tk(itr, tk, TkVar)?;
+    let (first_decl, tk2) = parse_variable_element(itr, tk1)?;
+    let (mut cons_decl, tk3) = parse_comma_repetition(itr, 
+                                                      tk2,
+                                                      &parse_variable_element)?;
+    let tk4 = match_tk(itr, tk3, TkSemi)?;
+
+    cons_decl.insert(0, first_decl);
+    Ok((cons_decl, tk4))
+}
 
 fn parse_source_element(
     itr: &mut FStream,
     tk: Token
     ) -> JsishResult<(SourceElement, Token)> {
 
-    // if tk == TkVar {
-    //     let (decl, tk1) = parse_variable_elements(itr, tk)?;
-    //     Ok((VarDecl(decl), tk1))
-    // }
-    // else {
+    if tk == TkVar {
+        let (decl, tk1) = parse_variable_elements(itr, tk)?;
+        Ok((VarDecl(decl), tk1))
+    }
+    else {
         let (stmt, tk1) = parse_statement(itr, tk)?;
         Ok((Stmt(stmt), tk1))
-    // }
+    }
 }
 
 fn parse_program(

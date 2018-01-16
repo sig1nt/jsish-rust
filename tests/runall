@@ -2,13 +2,12 @@
 
 for hw_dir in "$@"; do
     for f in `find $hw_dir/1_parser -type f | cut -d'.' -f1 | sort | uniq`; do
-        rm tmp.out tmp.err
         echo $f.jsish
-        cargo run -q $f.jsish > tmp.out 2> tmp.err; 
+        cargo run -q -- --ast $f.jsish > tmp.out 2> tmp.err; 
         cat tmp.err tmp.out | diff $f.correct -
         RES=$?
         rm tmp.out tmp.err
-        if [ RES != 0 ]; then
+        if [ $RES != 0 ]; then
             exit 1
         fi
     done
@@ -19,7 +18,7 @@ for hw_dir in "$@"; do
         cat tmp.err tmp.out | diff $f.correct -
         RES=$?
         rm tmp.out tmp.err
-        if [ RES != 0 ]; then
+        if [ $RES != 0 ]; then
             exit 1
         fi
     done
@@ -30,7 +29,7 @@ for hw_dir in "$@"; do
         cat tmp.err tmp.out | diff $f.correct -
         RES=$?
         rm tmp.out tmp.err
-        if [ RES != 0 ]; then
+        if [ $RES != 0 ]; then
             exit 1
         fi
     done
@@ -41,7 +40,7 @@ for hw_dir in "$@"; do
         cat tmp.err tmp.out | diff $f.correct -
         RES=$?
         rm tmp.out tmp.err
-        if [ RES != 0 ]; then
+        if [ $RES != 0 ]; then
             exit 1
         fi
     done
@@ -53,7 +52,7 @@ for hw_dir in "$@"; do
             cat tmp.err tmp.out | diff $f.correct -
             RES=$?
             rm tmp.out tmp.err
-            if [ RES != 0 ]; then
+            if [ $RES != 0 ]; then
                 exit 1
             fi
         done

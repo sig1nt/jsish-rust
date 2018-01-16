@@ -68,11 +68,22 @@ pub struct DeclInitData {
     pub src: Box<Expression>
 }
 
-// #[derive(Clone, Debug, PartialEq)]
-// pub enum Declaration {
-//     DeclId(String),
-//     DeclInit(DeclInitData)
-// }
+#[derive(Clone, Debug, PartialEq)]
+pub enum Declaration {
+    DeclId(String),
+    DeclInit(DeclInitData)
+}
+
+impl fmt::Display for Declaration {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        use self::Declaration::*;
+        match *self {
+            DeclId(ref s) => write!(f, "{}", s),
+            DeclInit(DeclInitData { ref id, ref src }) =>
+                write!(f, "{} = {}", id, src)
+        }
+    }
+}
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct ExpBinaryData {
@@ -183,14 +194,21 @@ impl fmt::Display for Statement {
 #[derive(Clone, Debug, PartialEq)]
 pub enum SourceElement {
     Stmt(Statement),
-    // VarDecl(Vec<Declaration>)
+    VarDecl(Vec<Declaration>)
 }
 
 impl fmt::Display for SourceElement {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         use self::SourceElement::*;
         match *self {
-            Stmt(ref s) => write!(f, "{}", s)
+            Stmt(ref s) => write!(f, "{}", s),
+            VarDecl(ref decls) => {
+                write!(f, "var ")?;
+                for decl in decls {
+                    write!(f, "{}, ", decl)?;
+                }
+                write!(f, "\n")
+            }
         }
     }
 }

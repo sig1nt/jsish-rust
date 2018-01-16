@@ -307,7 +307,9 @@ fn eval_source_element(
     ) -> JsishResult<(Environment)> {
 
     match se {
-        Stmt(s) => eval_statement(s, env)
+        Stmt(s) => eval_statement(s, env),
+        _ => Err(JsishError::from("Not yet implemented"))
+
     }
 }
 
