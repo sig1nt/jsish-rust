@@ -129,14 +129,7 @@ fn parse_comma_repetition<T>(
     tk: Token,
     parse_single: &Fn(&mut FStream, Token) -> JsishResult<(T, Token)>
     ) -> JsishResult<(Vec<T>, Token)> {
-    let parse_with_comma = { |itr: &mut FStream, tk: Token|
-        parse_single(itr,
-                     match_tk(itr, tk, TkComma)?)};
-
-    parse_repetition(itr,
-                     tk,
-                     &(|x| *x == TkComma),
-                     &parse_with_comma)
+    Err(JsishError::from("Not yet Implemented"))
 }
 
 fn parse_binary_expression(
