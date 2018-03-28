@@ -129,7 +129,22 @@ fn parse_comma_repetition<T>(
     tk: Token,
     parse_single: &Fn(&mut FStream, Token) -> JsishResult<(T, Token)>
     ) -> JsishResult<(Vec<T>, Token)> {
-    Err(JsishError::from("Not yet Implemented"))
+
+    let (one, tk_rest) = parse_single(itr, tk)?;
+
+    let mut elems: Vec<T> = Vec::new();
+    let mut tk_cursor = tk_rest;
+
+    elems.push(one);
+
+    while tk_cursor == TkComma {
+        let tk_temp = match_tk(itr, tk_cursor, TkComma)?;
+        let (elem, tk_temp2) = parse_single(itr, tk_temp)?;
+        elems.push(elem);
+        tk_cursor = tk_temp2;
+    }
+
+    Ok((elems, tk_cursor))
 }
 
 fn parse_binary_expression(
@@ -481,14 +496,12 @@ fn parse_variable_elements(
     ) -> JsishResult<(Vec<Declaration>, Token)> {
 
     let tk1 = match_tk(itr, tk, TkVar)?;
-    let (first_decl, tk2) = parse_variable_element(itr, tk1)?;
-    let (mut cons_decl, tk3) = parse_comma_repetition(itr, 
-                                                      tk2,
-                                                      &parse_variable_element)?;
-    let tk4 = match_tk(itr, tk3, TkSemi)?;
+    let (decl, tk2) = parse_comma_repetition(itr, 
+                                             tk1,
+                                             &parse_variable_element)?;
+    let tk3 = match_tk(itr, tk2, TkSemi)?;
 
-    cons_decl.insert(0, first_decl);
-    Ok((cons_decl, tk4))
+    Ok((decl, tk3))
 }
 
 fn parse_source_element(
